@@ -7,20 +7,12 @@ import TextField from '@mui/material/TextField';
 import Button from '@mui/material/Button';
 import ButtonGroup from '@mui/material/ButtonGroup';
 import CircularProgress from '@mui/material/CircularProgress'
-import useSWR from 'swr';
+import useSWR, { useSWRConfig } from 'swr';
 
-const fetcher = (input: RequestInfo | URL, init?: RequestInit | undefined) => fetch(input, init).then(res => res.json())
-
-const Annotations: NextPage = () => {
-  return (
-    <Container fixed>
-      <Content />
-    </Container >
-  );
-}
+const fetcher = async (input: RequestInfo | URL, init?: RequestInit | undefined) => await fetch(input, init).then(res => res.json())
 
 const useAnnotation = (id: string | string[] | undefined) => {
-  const { data, error } = useSWR(`${process.env.NEXT_PUBLIC_API_BASEURL}/annotations/${id}`, fetcher)
+  const { data, error } = useSWR(`${process.env.NEXT_PUBLIC_API_BASEURL}/annotations/${id}`, fetcher);
 
   return {
     fetchedAnnotation: data,
@@ -29,12 +21,22 @@ const useAnnotation = (id: string | string[] | undefined) => {
   }
 }
 
-const TextBoxOptionBar = ({ handleClearClick, handleResetClick }: { handleClearClick: any, handleResetClick: any }) => {
+const updateAnnotationData = async (annotation: string, id: string | string[] | undefined) => {
+  return await fetch(`${process.env.NEXT_PUBLIC_API_BASEURL}/annotations/${id}`, {
+    method: 'PATCH',
+    body: JSON.stringify({ data: annotation }),
+    headers: {
+      'Content-type': 'application/json; charset=UTF-8',
+    },
+  });
+}
+
+const TextBoxOptionBar = ({ handleClearClick, handleResetClick, handleSaveClick }: { handleClearClick: any, handleResetClick: any, handleSaveClick: any }) => {
   return (
     <Grid xs={12} display='flex' justifyContent="flex-end" alignItems="center">
       <ButtonGroup aria-label="medium secondary button group">
         {[
-          <Button key="save">Save</Button>,
+          <Button key="save" onClick={handleSaveClick}>Save</Button>,
           <Button key="reset" onClick={handleResetClick}>Reset</Button>,
           <Button key="clear" onClick={handleClearClick}>Clear</Button>
         ]}
@@ -51,12 +53,10 @@ const TextBox = ({ annotation, handleChange }: { annotation: string, handleChang
   );
 }
 
-const Content = () => {
+const Content = ({ id }: { id: string | string[] | undefined }) => {
   const [annotation, setAnnotation] = useState('');
-
-  const router = useRouter();
-  const { id } = router.query;
   const { fetchedAnnotation, isAnnotationLoading, isAnnotationError } = useAnnotation(id);
+  const { mutate } = useSWRConfig()
 
   useEffect(() => {
     if (!isAnnotationLoading) setAnnotation(fetchedAnnotation?.data);
@@ -74,8 +74,9 @@ const Content = () => {
     setAnnotation(fetchedAnnotation?.data);
   }
 
-  const handleSaveClick = () => {
-
+  const handleSaveClick = async () => {
+    await updateAnnotationData(annotation, id);
+    await mutate(`${process.env.NEXT_PUBLIC_API_BASEURL}/annotations/${id}`, annotation);
   }
 
   if (isAnnotationLoading) return (
@@ -88,10 +89,21 @@ const Content = () => {
 
   return (
     <Grid container spacing={0}>
-      <TextBoxOptionBar handleClearClick={handleClearClick} handleResetClick={handleResetClick} />
+      <TextBoxOptionBar handleClearClick={handleClearClick} handleResetClick={handleResetClick} handleSaveClick={handleSaveClick} />
       <TextBox annotation={annotation} handleChange={handleChange} />
     </Grid >
   )
+}
+
+const Annotations: NextPage = () => {
+  const router = useRouter();
+  const { id } = router.query;
+
+  return (
+    <Container fixed>
+      {id ? <Content id={id} /> : <CircularProgress />}
+    </Container >
+  );
 }
 
 export default Annotations
