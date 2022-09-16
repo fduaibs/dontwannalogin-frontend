@@ -14,7 +14,7 @@ import Typography from '@mui/material/Typography';
 const fetcher = async (input: RequestInfo | URL, init?: RequestInit | undefined) => await fetch(input, init).then(res => res.json())
 
 const useAnnotation = (id: string | string[] | undefined) => {
-  const { data, error } = useSWR(`${process.env.NEXT_PUBLIC_API_BASEURL}/annotations/${id}`, fetcher);
+  const { data, error } = useSWR(`${process.env.NEXT_PUBLIC_API_BASEURL}/annotations/${id}/find-by-alias-or-id`, fetcher);
 
   return {
     fetchedAnnotation: data,
@@ -43,8 +43,8 @@ const updateAlias = async (id: string | string[] | undefined, alias: string | st
   });
 }
 
-const TextBoxOptionBar = ({ id, handleClearClick, handleResetClick, handleSaveClick }: { id: string | string[] | undefined, handleClearClick: any, handleResetClick: any, handleSaveClick: any }) => {
-  const [inputState, setInputState] = useState(true);
+const TextBoxOptionBar = ({ id, trueId, handleClearClick, handleResetClick, handleSaveClick }: { id: string | string[] | undefined, trueId: string, handleClearClick: any, handleResetClick: any, handleSaveClick: any }) => {
+  const [inputState, setInputState] = useState(false);
   const [alias, setAlias] = useState(id);
   const router = useRouter();
 
@@ -53,24 +53,24 @@ const TextBoxOptionBar = ({ id, handleClearClick, handleResetClick, handleSaveCl
   }
 
   const handleEditClick = () => {
-    setInputState(false);
+    setInputState(true);
   }
 
   const handleCancelClick = () => {
-    setInputState(true);
+    setInputState(false);
   }
 
   const handleDoneClick = async () => {
-    await updateAlias(id, alias);
-    setInputState(true);
+    await updateAlias(trueId, alias);
+    setInputState(false);
     router.push(`/${alias}`);
   }
 
   return (
     <>
       <Grid xs={6} display='flex' justifyContent="flex-start" alignItems="center">
-        <TextField value={alias} disabled={inputState} id="standard-basic" variant="standard" onChange={handleChange} />
-        {!inputState ? (
+        <TextField value={alias} disabled={!inputState} id="standard-basic" variant="standard" onChange={handleChange} />
+        {inputState ? (
           <>
             <Button key="done" onClick={handleDoneClick}>Done</Button>
             <Button key="cancel" onClick={handleCancelClick}>Cancel</Button>
@@ -100,14 +100,15 @@ const TextBox = ({ annotation, handleChange }: { annotation: string, handleChang
   );
 }
 
-const Content = ({ id }: { id: string | string[] | undefined }) => {
+const Content = ({ id, trueId }: { id: string | string[] | undefined, trueId: string }) => {
   const [annotation, setAnnotation] = useState('');
+
   const { fetchedAnnotation, isAnnotationLoading, isAnnotationError } = useAnnotation(id);
-  const { mutate } = useSWRConfig()
+  const { mutate } = useSWRConfig();
 
   useEffect(() => {
     if (!isAnnotationLoading) setAnnotation(fetchedAnnotation?.data || '');
-  }, [isAnnotationLoading])
+  }, [id])
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setAnnotation(event.target.value);
@@ -122,8 +123,8 @@ const Content = ({ id }: { id: string | string[] | undefined }) => {
   }
 
   const handleSaveClick = async () => {
-    await updateAnnotationData(annotation, id);
-    await mutate(`${process.env.NEXT_PUBLIC_API_BASEURL}/annotations/${id}`, annotation);
+    await updateAnnotationData(annotation, trueId);
+    await mutate(`${process.env.NEXT_PUBLIC_API_BASEURL}/annotations/${trueId}`, annotation);
   }
 
   if (isAnnotationLoading) return (
@@ -136,7 +137,7 @@ const Content = ({ id }: { id: string | string[] | undefined }) => {
 
   return (
     <Grid container spacing={0}>
-      <TextBoxOptionBar id={id} handleClearClick={handleClearClick} handleResetClick={handleResetClick} handleSaveClick={handleSaveClick} />
+      <TextBoxOptionBar id={id} trueId={trueId} handleClearClick={handleClearClick} handleResetClick={handleResetClick} handleSaveClick={handleSaveClick} />
       <TextBox annotation={annotation} handleChange={handleChange} />
     </Grid >
   )
@@ -158,14 +159,21 @@ const Annotations: NextPage = () => {
   const router = useRouter();
   const { id } = router.query;
 
+  const { fetchedAnnotation } = useAnnotation(id);
+  const trueId = fetchedAnnotation?._id;
+
+  if (fetchedAnnotation?.alias && id != fetchedAnnotation.alias) {
+    router.push(`${fetchedAnnotation.alias}`)
+  }
+
   return (
     <>
       <MyAppBar />
       <Container fixed>
-        {id ? (
-          <Content id={id} />
+        {trueId ? (
+          <Content id={id} trueId={trueId} />
         ) : (
-          <CircularProgress />
+          <div>ID NÃO EXISTENTE</div>
         )}
       </Container >
     </>
