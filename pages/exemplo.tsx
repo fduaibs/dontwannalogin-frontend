@@ -18,7 +18,8 @@ const Home: NextPage = () => {
         </h1>
 
         <p className={styles.description}>
-          Comece escolhendo uma das opções:
+          Get started by editing{' '}
+          <code className={styles.code}>pages/index.tsx</code>
         </p>
 
         <div className={styles.grid}>
