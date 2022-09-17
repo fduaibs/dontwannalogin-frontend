@@ -10,6 +10,8 @@ import ButtonGroup from '@mui/material/ButtonGroup';
 import CircularProgress from '@mui/material/CircularProgress'
 import AppBar from '@mui/material/AppBar';
 import Typography from '@mui/material/Typography';
+import Toolbar from '@mui/material/Toolbar';
+import AdbIcon from '@mui/icons-material/Adb';
 
 const fetcher = async (input: RequestInfo | URL, init?: RequestInit | undefined) => await fetch(input, init).then(res => res.json())
 
@@ -68,8 +70,8 @@ const TextBoxOptionBar = ({ id, trueId, handleClearClick, handleResetClick, hand
 
   return (
     <>
-      <Grid xs={6} display='flex' justifyContent="flex-start" alignItems="center">
-        <TextField value={alias} disabled={!inputState} id="standard-basic" variant="standard" onChange={handleChange} />
+      <Grid xs={6} sm={7} md={5} lg={4} display='flex' justifyContent="flex-start" alignItems="center">
+        <TextField value={alias} fullWidth disabled={!inputState} id="standard-basic" variant="standard" onChange={handleChange} />
         {inputState ? (
           <>
             <Button key="done" onClick={handleDoneClick}>Done</Button>
@@ -79,7 +81,7 @@ const TextBoxOptionBar = ({ id, trueId, handleClearClick, handleResetClick, hand
           <Button key="edit" onClick={handleEditClick}>Edit</Button>
         )}
       </Grid>
-      <Grid xs={6} display='flex' justifyContent="flex-end" alignItems="center">
+      <Grid xs display='flex' justifyContent="flex-end" alignItems="center">
         <ButtonGroup aria-label="medium secondary button group">
           {[
             <Button key="save" onClick={handleSaveClick}>Save</Button>,
@@ -136,10 +138,10 @@ const Content = ({ id, trueId }: { id: string | string[] | undefined, trueId: st
   )
 
   return (
-    <Grid container spacing={0}>
+    <Grid container spacing={2} style={{ marginTop: '1rem' }} >
       <TextBoxOptionBar id={id} trueId={trueId} handleClearClick={handleClearClick} handleResetClick={handleResetClick} handleSaveClick={handleSaveClick} />
       <TextBox annotation={annotation} handleChange={handleChange} />
-    </Grid >
+    </Grid>
   )
 }
 
@@ -147,9 +149,26 @@ const MyAppBar = () => {
   return (
     <>
       <AppBar position="static">
-        <Typography variant="h4" component="div" sx={{ flexGrow: 1 }}>
-          NaoQueroLogar
-        </Typography>
+        <Toolbar disableGutters>
+          <Typography
+            variant="h4"
+            noWrap
+            component="a"
+            href="/"
+            sx={{
+              mr: 2,
+              display: { xs: 'flex' },
+              fontFamily: 'monospace',
+              fontWeight: 700,
+              letterSpacing: '.3rem',
+              color: 'inherit',
+              textDecoration: 'none',
+            }}
+          >
+            <AdbIcon sx={{ display: { xs: 'flex' }, mr: 1, mt: 0.9, ml: 1 }} />
+            NaoQueroLogar!
+          </Typography>
+        </Toolbar>
       </AppBar>
     </>
   );
@@ -167,7 +186,7 @@ const Annotations: NextPage = () => {
   }
 
   return (
-    <>
+    <Grid container spacing={0}>
       <MyAppBar />
       <Container fixed>
         {trueId ? (
@@ -176,7 +195,7 @@ const Annotations: NextPage = () => {
           <div>ID NÃO EXISTENTE</div>
         )}
       </Container >
-    </>
+    </Grid>
   );
 }
 
