@@ -102,15 +102,21 @@ const TextBox = ({ annotation, handleChange }: { annotation: string, handleChang
   );
 }
 
-const Content = ({ id, trueId }: { id: string | string[] | undefined, trueId: string }) => {
+const Content = ({ id }: { id: string | string[] | undefined }) => {
   const [annotation, setAnnotation] = useState('');
+  const { fetchedAnnotation, isAnnotationLoading } = useAnnotation(id);
+  const trueId = fetchedAnnotation?._id;
 
-  const { fetchedAnnotation, isAnnotationLoading, isAnnotationError } = useAnnotation(id);
+  const router = useRouter();
+  if (fetchedAnnotation?.alias && id != fetchedAnnotation.alias) {
+    router.push(`${fetchedAnnotation.alias}`)
+  }
+
   const { mutate } = useSWRConfig();
 
   useEffect(() => {
     if (!isAnnotationLoading) setAnnotation(fetchedAnnotation?.data || '');
-  }, [id])
+  }, [isAnnotationLoading])
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setAnnotation(event.target.value);
@@ -178,21 +184,14 @@ const Annotations: NextPage = () => {
   const router = useRouter();
   const { id } = router.query;
 
-  const { fetchedAnnotation } = useAnnotation(id);
-  const trueId = fetchedAnnotation?._id;
-
-  if (fetchedAnnotation?.alias && id != fetchedAnnotation.alias) {
-    router.push(`${fetchedAnnotation.alias}`)
-  }
-
   return (
     <Grid container spacing={0}>
       <MyAppBar />
       <Container fixed>
-        {trueId ? (
-          <Content id={id} trueId={trueId} />
+        {id ? (
+          <Content id={id} />
         ) : (
-          <div>ID NÃO EXISTENTE</div>
+          <CircularProgress />
         )}
       </Container >
     </Grid>
