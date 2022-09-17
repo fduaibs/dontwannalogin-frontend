@@ -1,71 +1,81 @@
 import type { NextPage } from 'next'
+import { useRouter } from 'next/router'
 import Head from 'next/head'
-import Image from 'next/image'
-import styles from '../styles/Home.module.css'
+import Typography from '@mui/material/Typography';
+import Grid from '@mui/material/Unstable_Grid2';
+import Container from '@mui/material/Container';
+import Button from '@mui/material/Button';
+import AdbIcon from '@mui/icons-material/Adb';
+import Divider from '@mui/material/Divider';
+import TextField from '@mui/material/TextField';
+
+const createAnnotation = async () => {
+  const createdAnnotation = await fetch(`${process.env.NEXT_PUBLIC_API_BASEURL}/annotations/`, {
+    method: 'POST',
+    body: JSON.stringify({
+      alias: '',
+      password: '',
+      data: '',
+    }),
+  });
+
+  return createdAnnotation.json();
+}
 
 const Home: NextPage = () => {
+  const router = useRouter();
+
+  const handleCreateClick = async () => {
+    const createdAnnotation = await createAnnotation();
+
+    if (createdAnnotation?.alias) router.push(`/${createdAnnotation?.alias}`)
+  }
+
   return (
-    <div className={styles.container}>
+    <Container fixed>
       <Head>
         <title>DontWannaLogin</title>
         <meta name="description" content="A Description" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
-      <main className={styles.main}>
-        <h1 className={styles.title}>
-          Welcome to <a href="https://nextjs.org">Next.js!</a>
-        </h1>
 
-        <p className={styles.description}>
-          Get started by editing{' '}
-          <code className={styles.code}>pages/index.tsx</code>
-        </p>
+      <Grid container spacing={0}>
 
-        <div className={styles.grid}>
-          <a href="https://nextjs.org/docs" className={styles.card}>
-            <h2>Documentation &rarr;</h2>
-            <p>Find in-depth information about Next.js features and API.</p>
-          </a>
+        <Grid xs={12} display="flex" justifyContent="center" alignItems="center">
+          <Typography variant="h1" component="div" sx={{
+            fontSize: { xs: '2.5rem', sm: '3.5rem', md: '6rem' },
+            mt: 8,
+            display: { xs: 'flex' },
+            fontFamily: 'monospace',
+            fontWeight: 700,
+            letterSpacing: '.3rem',
+            color: 'inherit',
+            textDecoration: 'none',
+          }} >
+            NaoQueroLogar!
+          </Typography>
+          <AdbIcon sx={{ display: { xs: 'flex' }, mt: 4, fontSize: { sx: '2.5rem', sm: '4rem', md: '6rem' } }} />
+        </Grid>
 
-          <a href="https://nextjs.org/learn" className={styles.card}>
-            <h2>Learn &rarr;</h2>
-            <p>Learn about Next.js in an interactive course with quizzes!</p>
-          </a>
+        <Grid xs={12} sx={{ mt: '2rem' }} display="flex" justifyContent="center" alignItems="center">
+          <Grid xs={4}>
+            <Divider variant="middle" />
+          </Grid>
+        </Grid>
 
-          <a
-            href="https://github.com/vercel/next.js/tree/canary/examples"
-            className={styles.card}
-          >
-            <h2>Examples &rarr;</h2>
-            <p>Discover and deploy boilerplate example Next.js projects.</p>
-          </a>
-
-          <a
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-            className={styles.card}
-          >
-            <h2>Deploy &rarr;</h2>
-            <p>
-              Instantly deploy your Next.js site to a public URL with Vercel.
-            </p>
-          </a>
-        </div>
-      </main>
-
-      <footer className={styles.footer}>
-        <a
-          href="https://vercel.com?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Powered by{' '}
-          <span className={styles.logo}>
-            <Image src="/vercel.svg" alt="Vercel Logo" width={72} height={16} />
-          </span>
-        </a>
-      </footer>
-    </div>
+        <Grid xs={12} display="flex" justifyContent="center" alignItems="center" sx={{ mt: '10rem' }}>
+          <Button variant="contained" size="large" onClick={handleCreateClick} sx={{ fontSize: { sx: '0.5rem', sm: '1.5rem' } }}>Criar uma nova anotação</Button>
+        </Grid>
+        {/* 
+        <Grid xs={12} display="flex" justifyContent="center" alignItems="center" sx={{ fontSize: { sx: '0.5rem', sm: '1.5rem' }, mt: '1rem' }}>
+          <Grid xs={5}>
+            <TextField id="standard-basic" variant="standard" sx={{ width: '250px', ml: '100px' }} />
+            <Button key="edit" sx={{ ml: '3px' }}>IR</Button>
+          </Grid>
+        </Grid> */}
+      </Grid>
+    </Container >
   )
 }
 
