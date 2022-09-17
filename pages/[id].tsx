@@ -71,7 +71,7 @@ const TextBoxOptionBar = ({ id, trueId, handleClearClick, handleResetClick, hand
   return (
     <>
       <Grid xs={6} sm={7} md={5} lg={4} display='flex' justifyContent="flex-start" alignItems="center">
-        <TextField value={alias} fullWidth disabled={!inputState} id="standard-basic" variant="standard" onChange={handleChange} />
+        <TextField value={alias} fullWidth disabled={!inputState} inputRef={input => { input && !input.disabled && input.focus() }} id="standard-basic" variant="standard" onChange={handleChange} />
         {inputState ? (
           <>
             <Button key="done" onClick={handleDoneClick}>Done</Button>
