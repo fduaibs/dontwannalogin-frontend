@@ -1,5 +1,5 @@
-import type { NextPage } from 'next'
 import { useState } from 'react';
+import type { NextPage } from 'next'
 import Head from 'next/head'
 import { useRouter } from 'next/router'
 import Typography from '@mui/material/Typography';
@@ -32,8 +32,8 @@ const Home: NextPage = () => {
   return (
     <Container fixed>
       <Head>
-        <title>DontWannaLogin</title>
-        <meta name="description" content="A Description" />
+        <title>NãoQueroLogar!</title>
+        <meta name="description" content="Bloco de notas persistente online." />
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <Grid container spacing={0}>
@@ -48,7 +48,7 @@ const Home: NextPage = () => {
             color: 'inherit',
             textDecoration: 'none',
           }} >
-            NaoQueroLogar!
+            NãoQueroLogar!
           </Typography>
           <AdbIcon sx={{ display: { xs: 'flex' }, mt: 4, fontSize: { sx: '2.5rem', sm: '4rem', md: '6rem' } }} />
         </Grid>
@@ -65,4 +65,4 @@ const Home: NextPage = () => {
   )
 }
 
-export default Home
+export default Home;
