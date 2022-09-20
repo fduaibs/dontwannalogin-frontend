@@ -1,3 +1,4 @@
+import * as React from 'react';
 import { useState } from 'react';
 import type { NextPage } from 'next'
 import Head from 'next/head'
@@ -8,6 +9,7 @@ import Container from '@mui/material/Container';
 import LoadingButton from '@mui/lab/LoadingButton';
 import AdbIcon from '@mui/icons-material/Adb';
 import Divider from '@mui/material/Divider';
+import CustomSnackbar from '../components/CustomSnackbar';
 
 const createAnnotation = async () => {
   const createdAnnotation = await fetch(`${process.env.NEXT_PUBLIC_API_BASEURL}/annotations/`, {
@@ -20,14 +22,29 @@ const createAnnotation = async () => {
 
 const Home: NextPage = () => {
   const [buttonLoading, setButtonLoading] = useState(false);
+  const [isSnackbarOpen, setIsSnackbarOpen] = React.useState(false);
+  const [errorMessage, setErrorMessage] = React.useState('');
+
   const router = useRouter();
 
   const handleCreateClick = async () => {
     setButtonLoading(true);
     const { statusCode, message, data } = await createAnnotation();
     if (statusCode === 201 && data?.alias) router.push(`/${data?.alias}`)
-    else setButtonLoading(false);
+    else {
+      setIsSnackbarOpen(true);
+      setErrorMessage(message);
+      setButtonLoading(false);
+    };
   }
+
+  const handleSnackBarClose = (event?: React.SyntheticEvent | Event, reason?: string) => {
+    if (reason === 'clickaway') {
+      return;
+    }
+
+    setIsSnackbarOpen(false);
+  };
 
   return (
     <Container fixed>
@@ -37,6 +54,7 @@ const Home: NextPage = () => {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <Grid container spacing={0}>
+        <CustomSnackbar severity="error" message={errorMessage} isSnackbarOpen={isSnackbarOpen} handleSnackBarClose={handleSnackBarClose} />
         <Grid xs={12} display="flex" justifyContent="center" alignItems="center">
           <Typography variant="h1" component="div" sx={{
             fontSize: { xs: '2.5rem', sm: '3.5rem', md: '6rem' },
