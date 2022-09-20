@@ -172,7 +172,7 @@ const MyAppBar = () => {
             }}
           >
             <AdbIcon sx={{ display: { xs: 'flex' }, mr: 1, mt: 0.9, ml: 1 }} />
-            NaoQueroLogar!
+            NãoQueroLogar!
           </Typography>
         </Toolbar>
       </AppBar>
