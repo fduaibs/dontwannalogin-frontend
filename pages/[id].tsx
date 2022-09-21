@@ -13,7 +13,7 @@ import Typography from '@mui/material/Typography';
 import Toolbar from '@mui/material/Toolbar';
 import AdbIcon from '@mui/icons-material/Adb';
 import LoadingButton from '@mui/lab/LoadingButton';
-import CustomSnackbar from '../components/CustomSnackbar';
+import ConsecutiveSnackbar, { SnackbarMessage } from '../components/ConsecutiveSnackbar';
 
 const fetcher = async (input: RequestInfo | URL, init?: RequestInit | undefined) => await fetch(input, init).then(res => res.json())
 
@@ -36,7 +36,17 @@ const updateAnnotationData = async (annotation: string, id: string | string[] | 
     },
   });
 
-  return { statusCode: updatedAnnotation.status, message: updatedAnnotation?.bodyUsed ? await updatedAnnotation.json() : '' };
+  const response = async () => {
+    if (updatedAnnotation?.ok === true && updatedAnnotation?.bodyUsed) {
+      return await updatedAnnotation.json();
+    }
+    if (updatedAnnotation?.ok === false) {
+      const { message } = await updatedAnnotation.json();
+      return message;
+    }
+  }
+
+  return { statusCode: updatedAnnotation.status, statusText: updatedAnnotation.statusText, message: await response() };
 }
 
 const updateAlias = async (id: string | string[] | undefined, alias: string | string[] | undefined) => {
@@ -48,10 +58,20 @@ const updateAlias = async (id: string | string[] | undefined, alias: string | st
     },
   });
 
-  return { statusCode: updatedAlias.status, message: updatedAlias.statusText, data: updatedAlias?.bodyUsed ? await updatedAlias.json() : '' };
+  const response = async () => {
+    if (updatedAlias?.ok === true && updatedAlias?.bodyUsed) {
+      return await updatedAlias.json();
+    }
+    if (updatedAlias?.ok === false) {
+      const { message } = await updatedAlias.json();
+      return message;
+    }
+  }
+
+  return { statusCode: updatedAlias.status, statusText: updatedAlias.statusText, message: await response() };
 }
 
-const TextBoxOptionBar = ({ id, trueId, handleClearClick, handleResetClick, handleSaveClick, snackbarStateSetter, errorMessageSetter, saveButtonLoadingState }: { id: string | string[] | undefined, trueId: string, handleClearClick: any, handleResetClick: any, handleSaveClick: any, snackbarStateSetter: any, errorMessageSetter: any, saveButtonLoadingState: boolean }) => {
+const TextBoxOptionBar = ({ id, trueId, handleClearClick, handleResetClick, handleSaveClick, snackbarStateSetter, setSnackPack, saveButtonLoadingState }: { id: string | string[] | undefined, trueId: string, handleClearClick: any, handleResetClick: any, handleSaveClick: any, snackbarStateSetter: any, setSnackPack: any, saveButtonLoadingState: boolean }) => {
   const [inputState, setInputState] = useState(false);
   const [doneButtonLoading, setDoneButtonLoading] = useState(false);
   const [alias, setAlias] = useState(id);
@@ -81,9 +101,14 @@ const TextBoxOptionBar = ({ id, trueId, handleClearClick, handleResetClick, hand
         router.push(`/${alias}`);
       } else {
         snackbarStateSetter(true);
-        errorMessageSetter(message);
+        setSnackPack((prev: any) => [...prev, { message, severity: 'error', key: new Date().getTime() }]);
         setDoneButtonLoading(false);
       }
+    } else {
+      setDoneButtonLoading(true);
+      snackbarStateSetter(true);
+      setSnackPack((prev: any) => [...prev, { message: 'O apelido precisa ser diferente do atual', severity: 'error', key: new Date().getTime() }]);
+      setDoneButtonLoading(false);
     }
   }
 
@@ -124,7 +149,8 @@ const TextBox = ({ annotation, handleChange }: { annotation: string, handleChang
 const Content = ({ id }: { id: string | string[] | undefined }) => {
   const [annotation, setAnnotation] = useState('');
   const [isSnackbarOpen, setIsSnackbarOpen] = useState(false);
-  const [errorMessage, setErrorMessage] = useState('');
+  const [snackPack, setSnackPack] = useState<readonly SnackbarMessage[]>([]);
+  const [errorMessage, setErrorMessage] = useState<SnackbarMessage | undefined>(undefined);
   const [saveButtonLoading, setSaveButtonLoading] = useState(false);
   const { fetchedAnnotation, isAnnotationLoading } = useAnnotation(id);
   const trueId = fetchedAnnotation?._id;
@@ -154,13 +180,14 @@ const Content = ({ id }: { id: string | string[] | undefined }) => {
 
   const handleSaveClick = async () => {
     setSaveButtonLoading(true);
-    const { statusCode, message } = await updateAnnotationData(annotation, trueId);
+    const { statusCode } = await updateAnnotationData(annotation, trueId);
 
     if (statusCode === 204) {
       await mutate(`${process.env.NEXT_PUBLIC_API_BASEURL}/annotations/${trueId}`, annotation);
+      setSnackPack((prev: any) => [...prev, { message: 'Conteúdo salvo com sucesso', severity: 'success', key: new Date().getTime() }]);
       setSaveButtonLoading(false);
     } else {
-      setErrorMessage(message);
+      setSnackPack((prev: any) => [...prev, { message: 'Não foi possível salvar o conteúdo', severity: 'error', key: new Date().getTime() }]);
       setSaveButtonLoading(false);
     }
   }
@@ -175,8 +202,8 @@ const Content = ({ id }: { id: string | string[] | undefined }) => {
 
   return (
     <Grid container spacing={2} style={{ marginTop: '1rem' }} >
-      <CustomSnackbar severity="error" message={errorMessage} snackBarState={isSnackbarOpen} snackbarStateSetter={setIsSnackbarOpen} />
-      <TextBoxOptionBar id={id} trueId={trueId} handleClearClick={handleClearClick} handleResetClick={handleResetClick} handleSaveClick={handleSaveClick} errorMessageSetter={setErrorMessage} snackbarStateSetter={setIsSnackbarOpen} saveButtonLoadingState={saveButtonLoading} />
+      <ConsecutiveSnackbar snackPack={snackPack} setSnackPack={setSnackPack} snackBarState={isSnackbarOpen} setSnackBarState={setIsSnackbarOpen} errorMessage={errorMessage} setErrorMessage={setErrorMessage} />
+      <TextBoxOptionBar id={id} trueId={trueId} handleClearClick={handleClearClick} handleResetClick={handleResetClick} handleSaveClick={handleSaveClick} setSnackPack={setSnackPack} snackbarStateSetter={setIsSnackbarOpen} saveButtonLoadingState={saveButtonLoading} />
       <TextBox annotation={annotation} handleChange={handleChange} />
     </Grid>
   )
