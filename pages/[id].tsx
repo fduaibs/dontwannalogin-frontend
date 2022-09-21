@@ -12,6 +12,7 @@ import AppBar from '@mui/material/AppBar';
 import Typography from '@mui/material/Typography';
 import Toolbar from '@mui/material/Toolbar';
 import AdbIcon from '@mui/icons-material/Adb';
+import CustomSnackbar from '../components/CustomSnackbar';
 
 const fetcher = async (input: RequestInfo | URL, init?: RequestInit | undefined) => await fetch(input, init).then(res => res.json())
 
@@ -26,26 +27,30 @@ const useAnnotation = (id: string | string[] | undefined) => {
 }
 
 const updateAnnotationData = async (annotation: string, id: string | string[] | undefined) => {
-  return await fetch(`${process.env.NEXT_PUBLIC_API_BASEURL}/annotations/${id}`, {
+  const updatedAnnotation = await fetch(`${process.env.NEXT_PUBLIC_API_BASEURL}/annotations/${id}`, {
     method: 'PATCH',
     body: JSON.stringify({ data: annotation }),
     headers: {
       'Content-type': 'application/json; charset=UTF-8',
     },
   });
+
+  return { statusCode: updatedAnnotation.status, message: updatedAnnotation?.bodyUsed ? await updatedAnnotation.json() : '' };
 }
 
 const updateAlias = async (id: string | string[] | undefined, alias: string | string[] | undefined) => {
-  return await fetch(`${process.env.NEXT_PUBLIC_API_BASEURL}/annotations/${id}`, {
+  const updatedAlias = await fetch(`${process.env.NEXT_PUBLIC_API_BASEURL}/annotations/${id}`, {
     method: 'PATCH',
     body: JSON.stringify({ alias: alias }),
     headers: {
       'Content-type': 'application/json; charset=UTF-8',
     },
   });
+
+  return { statusCode: updatedAlias.status, message: updatedAlias.statusText, data: updatedAlias?.bodyUsed ? await updatedAlias.json() : '' };
 }
 
-const TextBoxOptionBar = ({ id, trueId, handleClearClick, handleResetClick, handleSaveClick }: { id: string | string[] | undefined, trueId: string, handleClearClick: any, handleResetClick: any, handleSaveClick: any }) => {
+const TextBoxOptionBar = ({ id, trueId, handleClearClick, handleResetClick, handleSaveClick, snackbarStateSetter, errorMessageSetter }: { id: string | string[] | undefined, trueId: string, handleClearClick: any, handleResetClick: any, handleSaveClick: any, snackbarStateSetter: any, errorMessageSetter: any }) => {
   const [inputState, setInputState] = useState(false);
   const [alias, setAlias] = useState(id);
   const router = useRouter();
@@ -63,9 +68,14 @@ const TextBoxOptionBar = ({ id, trueId, handleClearClick, handleResetClick, hand
   }
 
   const handleDoneClick = async () => {
-    await updateAlias(trueId, alias);
-    setInputState(false);
-    router.push(`/${alias}`);
+    const { statusCode, message } = await updateAlias(trueId, alias);
+    if (statusCode === 204) {
+      setInputState(false);
+      router.push(`/${alias}`);
+    } else {
+      snackbarStateSetter(true);
+      errorMessageSetter(message);
+    }
   }
 
   return (
@@ -104,6 +114,8 @@ const TextBox = ({ annotation, handleChange }: { annotation: string, handleChang
 
 const Content = ({ id }: { id: string | string[] | undefined }) => {
   const [annotation, setAnnotation] = useState('');
+  const [isSnackbarOpen, setIsSnackbarOpen] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
   const { fetchedAnnotation, isAnnotationLoading } = useAnnotation(id);
   const trueId = fetchedAnnotation?._id;
 
@@ -145,7 +157,8 @@ const Content = ({ id }: { id: string | string[] | undefined }) => {
 
   return (
     <Grid container spacing={2} style={{ marginTop: '1rem' }} >
-      <TextBoxOptionBar id={id} trueId={trueId} handleClearClick={handleClearClick} handleResetClick={handleResetClick} handleSaveClick={handleSaveClick} />
+      <CustomSnackbar severity="error" message={errorMessage} snackBarState={isSnackbarOpen} snackbarStateSetter={setIsSnackbarOpen} />
+      <TextBoxOptionBar id={id} trueId={trueId} handleClearClick={handleClearClick} handleResetClick={handleResetClick} handleSaveClick={handleSaveClick} errorMessageSetter={setErrorMessage} snackbarStateSetter={setIsSnackbarOpen} />
       <TextBox annotation={annotation} handleChange={handleChange} />
     </Grid>
   )

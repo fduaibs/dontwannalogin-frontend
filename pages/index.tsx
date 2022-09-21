@@ -1,4 +1,3 @@
-import * as React from 'react';
 import { useState } from 'react';
 import type { NextPage } from 'next'
 import Head from 'next/head'
@@ -22,8 +21,8 @@ const createAnnotation = async () => {
 
 const Home: NextPage = () => {
   const [buttonLoading, setButtonLoading] = useState(false);
-  const [isSnackbarOpen, setIsSnackbarOpen] = React.useState(false);
-  const [errorMessage, setErrorMessage] = React.useState('');
+  const [isSnackbarOpen, setIsSnackbarOpen] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
 
   const router = useRouter();
 
@@ -38,14 +37,6 @@ const Home: NextPage = () => {
     };
   }
 
-  const handleSnackBarClose = (event?: React.SyntheticEvent | Event, reason?: string) => {
-    if (reason === 'clickaway') {
-      return;
-    }
-
-    setIsSnackbarOpen(false);
-  };
-
   return (
     <Container fixed>
       <Head>
@@ -54,7 +45,7 @@ const Home: NextPage = () => {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <Grid container spacing={0}>
-        <CustomSnackbar severity="error" message={errorMessage} isSnackbarOpen={isSnackbarOpen} handleSnackBarClose={handleSnackBarClose} />
+        <CustomSnackbar severity="error" message={errorMessage} snackBarState={isSnackbarOpen} snackbarStateSetter={setIsSnackbarOpen} />
         <Grid xs={12} display="flex" justifyContent="center" alignItems="center">
           <Typography variant="h1" component="div" sx={{
             fontSize: { xs: '2.5rem', sm: '3.5rem', md: '6rem' },
