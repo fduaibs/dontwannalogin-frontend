@@ -8,7 +8,7 @@ import Container from '@mui/material/Container';
 import LoadingButton from '@mui/lab/LoadingButton';
 import AdbIcon from '@mui/icons-material/Adb';
 import Divider from '@mui/material/Divider';
-import CustomSnackbar from '../components/CustomSnackbar';
+import ConsecutiveSnackbar, { SnackbarMessage } from '../components/ConsecutiveSnackbar';
 
 const createAnnotation = async () => {
   const createdAnnotation = await fetch(`${process.env.NEXT_PUBLIC_API_BASEURL}/annotations/`, {
@@ -22,17 +22,18 @@ const createAnnotation = async () => {
 const Home: NextPage = () => {
   const [buttonLoading, setButtonLoading] = useState(false);
   const [isSnackbarOpen, setIsSnackbarOpen] = useState(false);
-  const [errorMessage, setErrorMessage] = useState('');
+  const [snackPack, setSnackPack] = useState<readonly SnackbarMessage[]>([]);
+  const [errorMessage, setErrorMessage] = useState<SnackbarMessage | undefined>(undefined);
 
   const router = useRouter();
 
   const handleCreateClick = async () => {
     setButtonLoading(true);
-    const { statusCode, message, data } = await createAnnotation();
-    if (statusCode === 201 && data?.alias) router.push(`/${data?.alias}`)
+    const { statusCode, data } = await createAnnotation();
+    if (statusCode === 201 && data?.alias) router.push(`/${data?.alias}`);
     else {
       setIsSnackbarOpen(true);
-      setErrorMessage(message);
+      setSnackPack((prev: any) => [...prev, { message: 'Não foi possível criar uma nova anotação', severity: 'error', key: new Date().getTime() }]);
       setButtonLoading(false);
     };
   }
@@ -45,7 +46,7 @@ const Home: NextPage = () => {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <Grid container spacing={0}>
-        <CustomSnackbar severity="error" message={errorMessage} snackBarState={isSnackbarOpen} snackbarStateSetter={setIsSnackbarOpen} />
+        <ConsecutiveSnackbar snackPack={snackPack} setSnackPack={setSnackPack} snackBarState={isSnackbarOpen} setSnackBarState={setIsSnackbarOpen} errorMessage={errorMessage} setErrorMessage={setErrorMessage} />
         <Grid xs={12} display="flex" justifyContent="center" alignItems="center">
           <Typography variant="h1" component="div" sx={{
             fontSize: { xs: '2.5rem', sm: '3.5rem', md: '6rem' },
