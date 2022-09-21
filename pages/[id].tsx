@@ -12,6 +12,8 @@ import AppBar from '@mui/material/AppBar';
 import Typography from '@mui/material/Typography';
 import Toolbar from '@mui/material/Toolbar';
 import AdbIcon from '@mui/icons-material/Adb';
+import LoadingButton from '@mui/lab/LoadingButton';
+import CustomSnackbar from '../components/CustomSnackbar';
 
 const fetcher = async (input: RequestInfo | URL, init?: RequestInit | undefined) => await fetch(input, init).then(res => res.json())
 
@@ -26,32 +28,37 @@ const useAnnotation = (id: string | string[] | undefined) => {
 }
 
 const updateAnnotationData = async (annotation: string, id: string | string[] | undefined) => {
-  return await fetch(`${process.env.NEXT_PUBLIC_API_BASEURL}/annotations/${id}`, {
+  const updatedAnnotation = await fetch(`${process.env.NEXT_PUBLIC_API_BASEURL}/annotations/${id}`, {
     method: 'PATCH',
     body: JSON.stringify({ data: annotation }),
     headers: {
       'Content-type': 'application/json; charset=UTF-8',
     },
   });
+
+  return { statusCode: updatedAnnotation.status, message: updatedAnnotation?.bodyUsed ? await updatedAnnotation.json() : '' };
 }
 
 const updateAlias = async (id: string | string[] | undefined, alias: string | string[] | undefined) => {
-  return await fetch(`${process.env.NEXT_PUBLIC_API_BASEURL}/annotations/${id}`, {
+  const updatedAlias = await fetch(`${process.env.NEXT_PUBLIC_API_BASEURL}/annotations/${id}`, {
     method: 'PATCH',
     body: JSON.stringify({ alias: alias }),
     headers: {
       'Content-type': 'application/json; charset=UTF-8',
     },
   });
+
+  return { statusCode: updatedAlias.status, message: updatedAlias.statusText, data: updatedAlias?.bodyUsed ? await updatedAlias.json() : '' };
 }
 
-const TextBoxOptionBar = ({ id, trueId, handleClearClick, handleResetClick, handleSaveClick }: { id: string | string[] | undefined, trueId: string, handleClearClick: any, handleResetClick: any, handleSaveClick: any }) => {
+const TextBoxOptionBar = ({ id, trueId, handleClearClick, handleResetClick, handleSaveClick, snackbarStateSetter, errorMessageSetter, saveButtonLoadingState }: { id: string | string[] | undefined, trueId: string, handleClearClick: any, handleResetClick: any, handleSaveClick: any, snackbarStateSetter: any, errorMessageSetter: any, saveButtonLoadingState: boolean }) => {
   const [inputState, setInputState] = useState(false);
+  const [doneButtonLoading, setDoneButtonLoading] = useState(false);
   const [alias, setAlias] = useState(id);
   const router = useRouter();
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setAlias(event.target.value)
+    setAlias(event.target.value);
   }
 
   const handleEditClick = () => {
@@ -59,13 +66,25 @@ const TextBoxOptionBar = ({ id, trueId, handleClearClick, handleResetClick, hand
   }
 
   const handleCancelClick = () => {
+    setAlias(id);
+    setDoneButtonLoading(false);
     setInputState(false);
   }
 
   const handleDoneClick = async () => {
-    await updateAlias(trueId, alias);
-    setInputState(false);
-    router.push(`/${alias}`);
+    if (alias != id) {
+      setDoneButtonLoading(true);
+      const { statusCode, message } = await updateAlias(trueId, alias);
+      if (statusCode === 204) {
+        setInputState(false);
+        setDoneButtonLoading(false);
+        router.push(`/${alias}`);
+      } else {
+        snackbarStateSetter(true);
+        errorMessageSetter(message);
+        setDoneButtonLoading(false);
+      }
+    }
   }
 
   return (
@@ -74,7 +93,7 @@ const TextBoxOptionBar = ({ id, trueId, handleClearClick, handleResetClick, hand
         <TextField value={alias} fullWidth disabled={!inputState} inputRef={input => { input && !input.disabled && input.focus() }} id="standard-basic" variant="standard" onChange={handleChange} />
         {inputState ? (
           <>
-            <Button key="done" onClick={handleDoneClick}>Done</Button>
+            <LoadingButton loading={doneButtonLoading} key="done" onClick={handleDoneClick}>Done</LoadingButton>
             <Button key="cancel" onClick={handleCancelClick}>Cancel</Button>
           </>
         ) : (
@@ -84,7 +103,7 @@ const TextBoxOptionBar = ({ id, trueId, handleClearClick, handleResetClick, hand
       <Grid xs display='flex' justifyContent="flex-end" alignItems="center">
         <ButtonGroup aria-label="medium secondary button group">
           {[
-            <Button key="save" onClick={handleSaveClick}>Save</Button>,
+            <LoadingButton variant="outlined" loading={saveButtonLoadingState} key="save" onClick={handleSaveClick}>Save</LoadingButton>,
             <Button key="reset" onClick={handleResetClick}>Reset</Button>,
             <Button key="clear" onClick={handleClearClick}>Clear</Button>,
           ]}
@@ -104,6 +123,9 @@ const TextBox = ({ annotation, handleChange }: { annotation: string, handleChang
 
 const Content = ({ id }: { id: string | string[] | undefined }) => {
   const [annotation, setAnnotation] = useState('');
+  const [isSnackbarOpen, setIsSnackbarOpen] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
+  const [saveButtonLoading, setSaveButtonLoading] = useState(false);
   const { fetchedAnnotation, isAnnotationLoading } = useAnnotation(id);
   const trueId = fetchedAnnotation?._id;
 
@@ -131,8 +153,16 @@ const Content = ({ id }: { id: string | string[] | undefined }) => {
   }
 
   const handleSaveClick = async () => {
-    await updateAnnotationData(annotation, trueId);
-    await mutate(`${process.env.NEXT_PUBLIC_API_BASEURL}/annotations/${trueId}`, annotation);
+    setSaveButtonLoading(true);
+    const { statusCode, message } = await updateAnnotationData(annotation, trueId);
+
+    if (statusCode === 204) {
+      await mutate(`${process.env.NEXT_PUBLIC_API_BASEURL}/annotations/${trueId}`, annotation);
+      setSaveButtonLoading(false);
+    } else {
+      setErrorMessage(message);
+      setSaveButtonLoading(false);
+    }
   }
 
   if (isAnnotationLoading) return (
@@ -145,7 +175,8 @@ const Content = ({ id }: { id: string | string[] | undefined }) => {
 
   return (
     <Grid container spacing={2} style={{ marginTop: '1rem' }} >
-      <TextBoxOptionBar id={id} trueId={trueId} handleClearClick={handleClearClick} handleResetClick={handleResetClick} handleSaveClick={handleSaveClick} />
+      <CustomSnackbar severity="error" message={errorMessage} snackBarState={isSnackbarOpen} snackbarStateSetter={setIsSnackbarOpen} />
+      <TextBoxOptionBar id={id} trueId={trueId} handleClearClick={handleClearClick} handleResetClick={handleResetClick} handleSaveClick={handleSaveClick} errorMessageSetter={setErrorMessage} snackbarStateSetter={setIsSnackbarOpen} saveButtonLoadingState={saveButtonLoading} />
       <TextBox annotation={annotation} handleChange={handleChange} />
     </Grid>
   )
@@ -172,7 +203,7 @@ const MyAppBar = () => {
             }}
           >
             <AdbIcon sx={{ display: { xs: 'flex' }, mr: 1, mt: 0.9, ml: 1 }} />
-            NaoQueroLogar!
+            NãoQueroLogar!
           </Typography>
         </Toolbar>
       </AppBar>
