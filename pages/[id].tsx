@@ -13,12 +13,7 @@ import Typography from '@mui/material/Typography';
 import Toolbar from '@mui/material/Toolbar';
 import AdbIcon from '@mui/icons-material/Adb';
 import LoadingButton from '@mui/lab/LoadingButton';
-import ConsecutiveSnackbar from '../components/ConsecutiveSnackbar';
-
-export interface SnackbarMessage {
-  message: string;
-  key: number;
-}
+import ConsecutiveSnackbar, { SnackbarMessage } from '../components/ConsecutiveSnackbar';
 
 const fetcher = async (input: RequestInfo | URL, init?: RequestInit | undefined) => await fetch(input, init).then(res => res.json())
 
@@ -106,13 +101,13 @@ const TextBoxOptionBar = ({ id, trueId, handleClearClick, handleResetClick, hand
         router.push(`/${alias}`);
       } else {
         snackbarStateSetter(true);
-        setSnackPack((prev: any) => [...prev, { message, key: new Date().getTime() }]);
+        setSnackPack((prev: any) => [...prev, { message, severity: 'error', key: new Date().getTime() }]);
         setDoneButtonLoading(false);
       }
     } else {
       setDoneButtonLoading(true);
       snackbarStateSetter(true);
-      setSnackPack((prev: any) => [...prev, { message: 'O apelido precisa ser diferente do atual', key: new Date().getTime() }]);
+      setSnackPack((prev: any) => [...prev, { message: 'O apelido precisa ser diferente do atual', severity: 'error', key: new Date().getTime() }]);
       setDoneButtonLoading(false);
     }
   }
@@ -185,13 +180,14 @@ const Content = ({ id }: { id: string | string[] | undefined }) => {
 
   const handleSaveClick = async () => {
     setSaveButtonLoading(true);
-    const { statusCode, message } = await updateAnnotationData(annotation, trueId);
+    const { statusCode } = await updateAnnotationData(annotation, trueId);
 
     if (statusCode === 204) {
       await mutate(`${process.env.NEXT_PUBLIC_API_BASEURL}/annotations/${trueId}`, annotation);
+      setSnackPack((prev: any) => [...prev, { message: 'Conteúdo salvo com sucesso', severity: 'success', key: new Date().getTime() }]);
       setSaveButtonLoading(false);
     } else {
-      setSnackPack((prev: any) => [...prev, { message, key: new Date().getTime() }]);
+      setSnackPack((prev: any) => [...prev, { message: 'Não foi possível salvar o conteúdo', severity: 'error', key: new Date().getTime() }]);
       setSaveButtonLoading(false);
     }
   }

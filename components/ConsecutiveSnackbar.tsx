@@ -3,6 +3,7 @@ import Snackbar from '@mui/material/Snackbar';
 import MuiAlert, { AlertProps } from '@mui/material/Alert';
 
 export interface SnackbarMessage {
+  severity: 'error' | 'warning' | 'info' | 'success';
   message: string;
   key: number;
 }
@@ -44,7 +45,7 @@ export default function ConsecutiveSnackbar({ snackPack, setSnackPack, snackBarS
         message={errorMessage ? errorMessage.message : undefined}
         anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
       >
-        <Alert onClose={handleClose} severity="error" sx={{ width: '100%' }}>
+        <Alert onClose={handleClose} severity={errorMessage?.severity} sx={{ width: '100%' }}>
           {errorMessage?.message}
         </Alert>
       </Snackbar>
