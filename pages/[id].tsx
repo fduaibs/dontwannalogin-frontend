@@ -112,7 +112,7 @@ const TextBoxOptionBar = ({ id, trueId, handleClearClick, handleResetClick, hand
     } else {
       setDoneButtonLoading(true);
       snackbarStateSetter(true);
-      setSnackPack((prev: any) => [...prev, { message: 'O apelido não pode ser o mesmo já utilizado', key: new Date().getTime() }]);
+      setSnackPack((prev: any) => [...prev, { message: 'O apelido precisa ser diferente do atual', key: new Date().getTime() }]);
       setDoneButtonLoading(false);
     }
   }
