@@ -36,7 +36,17 @@ const updateAnnotationData = async (annotation: string, id: string | string[] | 
     },
   });
 
-  return { statusCode: updatedAnnotation.status, message: updatedAnnotation?.bodyUsed ? await updatedAnnotation.json() : '' };
+  const response = async () => {
+    if (updatedAnnotation?.ok === true && updatedAnnotation?.bodyUsed) {
+      return await updatedAnnotation.json();
+    }
+    if (updatedAnnotation?.ok === false) {
+      const { message } = await updatedAnnotation.json();
+      return message;
+    }
+  }
+
+  return { statusCode: updatedAnnotation.status, statusText: updatedAnnotation.statusText, message: await response() };
 }
 
 const updateAlias = async (id: string | string[] | undefined, alias: string | string[] | undefined) => {
@@ -48,7 +58,17 @@ const updateAlias = async (id: string | string[] | undefined, alias: string | st
     },
   });
 
-  return { statusCode: updatedAlias.status, message: updatedAlias.statusText, data: updatedAlias?.bodyUsed ? await updatedAlias.json() : '' };
+  const response = async () => {
+    if (updatedAlias?.ok === true && updatedAlias?.bodyUsed) {
+      return await updatedAlias.json();
+    }
+    if (updatedAlias?.ok === false) {
+      const { message } = await updatedAlias.json();
+      return message;
+    }
+  }
+
+  return { statusCode: updatedAlias.status, statusText: updatedAlias.statusText, message: await response() };
 }
 
 const TextBoxOptionBar = ({ id, trueId, handleClearClick, handleResetClick, handleSaveClick, snackbarStateSetter, errorMessageSetter, saveButtonLoadingState }: { id: string | string[] | undefined, trueId: string, handleClearClick: any, handleResetClick: any, handleSaveClick: any, snackbarStateSetter: any, errorMessageSetter: any, saveButtonLoadingState: boolean }) => {
@@ -84,6 +104,11 @@ const TextBoxOptionBar = ({ id, trueId, handleClearClick, handleResetClick, hand
         errorMessageSetter(message);
         setDoneButtonLoading(false);
       }
+    } else {
+      setDoneButtonLoading(true);
+      snackbarStateSetter(true);
+      errorMessageSetter('O apelido não pode ser o mesmo já utilizado');
+      setDoneButtonLoading(false);
     }
   }
 
