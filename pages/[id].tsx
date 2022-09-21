@@ -13,7 +13,12 @@ import Typography from '@mui/material/Typography';
 import Toolbar from '@mui/material/Toolbar';
 import AdbIcon from '@mui/icons-material/Adb';
 import LoadingButton from '@mui/lab/LoadingButton';
-import CustomSnackbar from '../components/CustomSnackbar';
+import ConsecutiveSnackbar from '../components/ConsecutiveSnackbar';
+
+export interface SnackbarMessage {
+  message: string;
+  key: number;
+}
 
 const fetcher = async (input: RequestInfo | URL, init?: RequestInit | undefined) => await fetch(input, init).then(res => res.json())
 
@@ -71,7 +76,7 @@ const updateAlias = async (id: string | string[] | undefined, alias: string | st
   return { statusCode: updatedAlias.status, statusText: updatedAlias.statusText, message: await response() };
 }
 
-const TextBoxOptionBar = ({ id, trueId, handleClearClick, handleResetClick, handleSaveClick, snackbarStateSetter, errorMessageSetter, saveButtonLoadingState }: { id: string | string[] | undefined, trueId: string, handleClearClick: any, handleResetClick: any, handleSaveClick: any, snackbarStateSetter: any, errorMessageSetter: any, saveButtonLoadingState: boolean }) => {
+const TextBoxOptionBar = ({ id, trueId, handleClearClick, handleResetClick, handleSaveClick, snackbarStateSetter, setSnackPack, saveButtonLoadingState }: { id: string | string[] | undefined, trueId: string, handleClearClick: any, handleResetClick: any, handleSaveClick: any, snackbarStateSetter: any, setSnackPack: any, saveButtonLoadingState: boolean }) => {
   const [inputState, setInputState] = useState(false);
   const [doneButtonLoading, setDoneButtonLoading] = useState(false);
   const [alias, setAlias] = useState(id);
@@ -101,7 +106,7 @@ const TextBoxOptionBar = ({ id, trueId, handleClearClick, handleResetClick, hand
         router.push(`/${alias}`);
       } else {
         snackbarStateSetter(true);
-        errorMessageSetter(message);
+        setSnackPack((prev: any) => [...prev, { message, key: new Date().getTime() }]);
         setDoneButtonLoading(false);
       }
     } else {
@@ -149,7 +154,8 @@ const TextBox = ({ annotation, handleChange }: { annotation: string, handleChang
 const Content = ({ id }: { id: string | string[] | undefined }) => {
   const [annotation, setAnnotation] = useState('');
   const [isSnackbarOpen, setIsSnackbarOpen] = useState(false);
-  const [errorMessage, setErrorMessage] = useState('');
+  const [snackPack, setSnackPack] = useState<readonly SnackbarMessage[]>([]);
+  const [errorMessage, setErrorMessage] = useState<SnackbarMessage | undefined>(undefined);
   const [saveButtonLoading, setSaveButtonLoading] = useState(false);
   const { fetchedAnnotation, isAnnotationLoading } = useAnnotation(id);
   const trueId = fetchedAnnotation?._id;
@@ -185,7 +191,7 @@ const Content = ({ id }: { id: string | string[] | undefined }) => {
       await mutate(`${process.env.NEXT_PUBLIC_API_BASEURL}/annotations/${trueId}`, annotation);
       setSaveButtonLoading(false);
     } else {
-      setErrorMessage(message);
+      setSnackPack((prev: any) => [...prev, { message, key: new Date().getTime() }]);
       setSaveButtonLoading(false);
     }
   }
@@ -200,8 +206,8 @@ const Content = ({ id }: { id: string | string[] | undefined }) => {
 
   return (
     <Grid container spacing={2} style={{ marginTop: '1rem' }} >
-      <CustomSnackbar severity="error" message={errorMessage} snackBarState={isSnackbarOpen} snackbarStateSetter={setIsSnackbarOpen} />
-      <TextBoxOptionBar id={id} trueId={trueId} handleClearClick={handleClearClick} handleResetClick={handleResetClick} handleSaveClick={handleSaveClick} errorMessageSetter={setErrorMessage} snackbarStateSetter={setIsSnackbarOpen} saveButtonLoadingState={saveButtonLoading} />
+      <ConsecutiveSnackbar snackPack={snackPack} setSnackPack={setSnackPack} snackBarState={isSnackbarOpen} setSnackBarState={setIsSnackbarOpen} errorMessage={errorMessage} setErrorMessage={setErrorMessage} />
+      <TextBoxOptionBar id={id} trueId={trueId} handleClearClick={handleClearClick} handleResetClick={handleResetClick} handleSaveClick={handleSaveClick} setSnackPack={setSnackPack} snackbarStateSetter={setIsSnackbarOpen} saveButtonLoadingState={saveButtonLoading} />
       <TextBox annotation={annotation} handleChange={handleChange} />
     </Grid>
   )
