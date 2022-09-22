@@ -114,7 +114,7 @@ const TextBoxOptionBar = ({ id, trueId, handleClearClick, handleResetClick, hand
 
   return (
     <>
-      <Grid xs={6} sm={7} md={5} lg={4} display='flex' justifyContent="flex-start" alignItems="center">
+      <Grid xs={12} sm={7} md={5} lg={4} display='flex' justifyContent={{ xs: "center", sm: "flex-end" }} alignItems="center">
         <TextField value={alias} fullWidth disabled={!inputState} onBlur={handleCancelClick} inputRef={input => { console.log(input?.activeElement); input && !input.disabled && input.focus() }} id="standard-basic" variant="standard" onChange={handleChange} />
         {inputState ? (
           <>
@@ -125,7 +125,7 @@ const TextBoxOptionBar = ({ id, trueId, handleClearClick, handleResetClick, hand
           <Button key="edit" onClick={handleEditClick}>Edit</Button>
         )}
       </Grid>
-      <Grid xs display='flex' justifyContent="flex-end" alignItems="center">
+      <Grid xs={12} sm display='flex' justifyContent={{ xs: "center", sm: "flex-end" }} alignItems="center">
         <ButtonGroup aria-label="medium secondary button group">
           {[
             <LoadingButton variant="outlined" loading={saveButtonLoadingState} key="save" onClick={handleSaveClick}>Save</LoadingButton>,
