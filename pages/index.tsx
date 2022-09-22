@@ -49,7 +49,7 @@ const Home: NextPage = () => {
         <ConsecutiveSnackbar snackPack={snackPack} setSnackPack={setSnackPack} snackBarState={isSnackbarOpen} setSnackBarState={setIsSnackbarOpen} errorMessage={errorMessage} setErrorMessage={setErrorMessage} />
         <Grid xs={12} display="flex" justifyContent="center" alignItems="center">
           <Typography variant="h1" component="div" sx={{
-            fontSize: { xs: '2.5rem', sm: '3.5rem', md: '6rem' },
+            fontSize: { xs: '2rem', sm: '3.5rem', md: '6rem' },
             mt: 8,
             display: { xs: 'flex' },
             fontFamily: 'monospace',
