@@ -49,7 +49,7 @@ const Home: NextPage = () => {
         <ConsecutiveSnackbar snackPack={snackPack} setSnackPack={setSnackPack} snackBarState={isSnackbarOpen} setSnackBarState={setIsSnackbarOpen} errorMessage={errorMessage} setErrorMessage={setErrorMessage} />
         <Grid xs={12} display="flex" justifyContent="center" alignItems="center">
           <Typography variant="h1" component="div" sx={{
-            fontSize: { xs: '2.5rem', sm: '3.5rem', md: '6rem' },
+            fontSize: { xs: '2rem', sm: '3.5rem', md: '6rem' },
             mt: 8,
             display: { xs: 'flex' },
             fontFamily: 'monospace',
@@ -62,12 +62,12 @@ const Home: NextPage = () => {
           </Typography>
           <AdbIcon sx={{ display: { xs: 'flex' }, mt: 4, fontSize: { sx: '2.5rem', sm: '4rem', md: '6rem' } }} />
         </Grid>
-        <Grid xs={12} sx={{ mt: '2rem' }} display="flex" justifyContent="center" alignItems="center">
+        <Grid xs={12} sx={{ mt: { sx: '6rem', sm: '2rem' } }} display="flex" justifyContent="center" alignItems="center">
           <Grid xs={4}>
             <Divider variant="middle" />
           </Grid>
         </Grid>
-        <Grid xs={12} display="flex" justifyContent="center" alignItems="center" sx={{ mt: '10rem' }}>
+        <Grid xs={12} display="flex" justifyContent="center" alignItems="center" sx={{ mt: { sx: '6rem', sm: '10rem' } }}>
           <LoadingButton loading={buttonLoading} variant="contained" size="large" onClick={handleCreateClick} sx={{ fontSize: { sx: '0.5rem', sm: '1.5rem' } }}>Criar uma nova anotação</LoadingButton >
         </Grid>
       </Grid>
