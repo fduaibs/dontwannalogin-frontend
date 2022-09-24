@@ -1,6 +1,6 @@
 import type { NextPage } from 'next'
 import { useRouter } from 'next/router'
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import useSWR, { useSWRConfig } from 'swr';
 import Grid from '@mui/material/Unstable_Grid2';
 import Container from '@mui/material/Container';
@@ -76,6 +76,11 @@ const TextBoxOptionBar = ({ id, trueId, handleClearClick, handleResetClick, hand
   const [doneButtonLoading, setDoneButtonLoading] = useState(false);
   const [alias, setAlias] = useState(id);
   const router = useRouter();
+  const inputRef = useRef<HTMLInputElement>();
+
+  useEffect(() => {
+    if (inputState) inputRef.current?.focus();
+  }, [inputState])
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setAlias(event.target.value);
@@ -115,7 +120,7 @@ const TextBoxOptionBar = ({ id, trueId, handleClearClick, handleResetClick, hand
   return (
     <>
       <Grid xs={12} sm={7} md={5} lg={4} display='flex' justifyContent={{ xs: "center", sm: "flex-end" }} alignItems="center">
-        <TextField value={alias} fullWidth disabled={!inputState} onBlur={handleCancelClick} inputRef={input => { input && !input.disabled && input.focus() }} id="standard-basic" variant="standard" onChange={handleChange} />
+        <TextField value={alias} fullWidth disabled={!inputState} inputRef={inputRef} id="standard-basic" variant="standard" onChange={handleChange} />
         {inputState ? (
           <>
             <LoadingButton loading={doneButtonLoading} key="done" onClick={handleDoneClick}>Done</LoadingButton>
@@ -183,7 +188,6 @@ const Content = ({ id }: { id: string | string[] | undefined }) => {
     const { statusCode } = await updateAnnotationData(annotation, trueId);
 
     if (statusCode === 204) {
-      await mutate(`${process.env.NEXT_PUBLIC_API_BASEURL}/annotations/${trueId}`, annotation);
       setSnackPack((prev: any) => [...prev, { message: 'Conteúdo salvo com sucesso', severity: 'success', key: new Date().getTime() }]);
       setSaveButtonLoading(false);
     } else {
