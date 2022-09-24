@@ -1,7 +1,7 @@
 import type { NextPage } from 'next'
 import { useRouter } from 'next/router'
-import { useEffect, useState } from 'react';
-import useSWR, { useSWRConfig } from 'swr';
+import { useEffect, useRef, useState } from 'react';
+import useSWR from 'swr';
 import Grid from '@mui/material/Unstable_Grid2';
 import Container from '@mui/material/Container';
 import TextField from '@mui/material/TextField';
@@ -15,15 +15,18 @@ import AdbIcon from '@mui/icons-material/Adb';
 import LoadingButton from '@mui/lab/LoadingButton';
 import ConsecutiveSnackbar, { SnackbarMessage } from '../components/ConsecutiveSnackbar';
 
-const fetcher = async (input: RequestInfo | URL, init?: RequestInit | undefined) => await fetch(input, init).then(res => res.json())
 
 const useAnnotation = (id: string | string[] | undefined) => {
-  const { data, error } = useSWR(`${process.env.NEXT_PUBLIC_API_BASEURL}/annotations/${id}/find-by-alias-or-id`, fetcher);
+  const fetcher = async (input: RequestInfo | URL, init?: RequestInit | undefined) => await fetch(input, init).then(res => res.json());
+
+  const { data, error, isValidating, mutate } = useSWR(`${process.env.NEXT_PUBLIC_API_BASEURL}/annotations/${id}/find-by-alias-or-id`, fetcher);
 
   return {
     fetchedAnnotation: data,
     isAnnotationLoading: !error && !data,
     isAnnotationError: error,
+    isValidating,
+    mutate,
   }
 }
 
@@ -76,6 +79,11 @@ const TextBoxOptionBar = ({ id, trueId, handleClearClick, handleResetClick, hand
   const [doneButtonLoading, setDoneButtonLoading] = useState(false);
   const [alias, setAlias] = useState(id);
   const router = useRouter();
+  const inputRef = useRef<HTMLInputElement>();
+
+  useEffect(() => {
+    if (inputState) inputRef.current?.focus();
+  }, [inputState])
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setAlias(event.target.value);
@@ -101,13 +109,13 @@ const TextBoxOptionBar = ({ id, trueId, handleClearClick, handleResetClick, hand
         router.push(`/${alias}`);
       } else {
         snackbarStateSetter(true);
-        setSnackPack((prev: any) => [...prev, { message, severity: 'error', key: new Date().getTime() }]);
+        setSnackPack((prev: any) => [...prev, { message, severity: 'error', autoHideDuration: 5000, key: new Date().getTime() }]);
         setDoneButtonLoading(false);
       }
     } else {
       setDoneButtonLoading(true);
       snackbarStateSetter(true);
-      setSnackPack((prev: any) => [...prev, { message: 'O apelido precisa ser diferente do atual', severity: 'error', key: new Date().getTime() }]);
+      setSnackPack((prev: any) => [...prev, { message: 'O apelido precisa ser diferente do atual', severity: 'error', autoHideDuration: 5000, key: new Date().getTime() }]);
       setDoneButtonLoading(false);
     }
   }
@@ -115,7 +123,7 @@ const TextBoxOptionBar = ({ id, trueId, handleClearClick, handleResetClick, hand
   return (
     <>
       <Grid xs={12} sm={7} md={5} lg={4} display='flex' justifyContent={{ xs: "center", sm: "flex-end" }} alignItems="center">
-        <TextField value={alias} fullWidth disabled={!inputState} onBlur={handleCancelClick} inputRef={input => { input && !input.disabled && input.focus() }} id="standard-basic" variant="standard" onChange={handleChange} />
+        <TextField value={alias} fullWidth disabled={!inputState} inputRef={inputRef} id="standard-basic" variant="standard" onChange={handleChange} />
         {inputState ? (
           <>
             <LoadingButton loading={doneButtonLoading} key="done" onClick={handleDoneClick}>Done</LoadingButton>
@@ -147,24 +155,28 @@ const TextBox = ({ annotation, handleChange }: { annotation: string, handleChang
 }
 
 const Content = ({ id }: { id: string | string[] | undefined }) => {
-  const [annotation, setAnnotation] = useState('');
+  const [annotation, setAnnotation] = useState<undefined | string>(undefined);
   const [isSnackbarOpen, setIsSnackbarOpen] = useState(false);
   const [snackPack, setSnackPack] = useState<readonly SnackbarMessage[]>([]);
   const [errorMessage, setErrorMessage] = useState<SnackbarMessage | undefined>(undefined);
   const [saveButtonLoading, setSaveButtonLoading] = useState(false);
-  const { fetchedAnnotation, isAnnotationLoading } = useAnnotation(id);
+  const { fetchedAnnotation, isAnnotationLoading, mutate, isValidating } = useAnnotation(id);
   const trueId = fetchedAnnotation?._id;
 
   const router = useRouter();
+
   if (fetchedAnnotation?.alias && id != fetchedAnnotation.alias) {
     router.push(`${fetchedAnnotation.alias}`)
   }
 
-  const { mutate } = useSWRConfig();
-
   useEffect(() => {
     if (!isAnnotationLoading) setAnnotation(fetchedAnnotation?.data || '');
-  }, [isAnnotationLoading])
+  }, [isAnnotationLoading]);
+
+  useEffect(() => {
+    if (!isValidating && fetchedAnnotation?.data != annotation && annotation != undefined)
+      setSnackPack((prev: any) => [...prev, { message: 'Alguém alterou seu documento de outra sessão', severity: 'warning', key: new Date().getTime() }]);
+  }, [isValidating]);
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setAnnotation(event.target.value);
@@ -180,14 +192,14 @@ const Content = ({ id }: { id: string | string[] | undefined }) => {
 
   const handleSaveClick = async () => {
     setSaveButtonLoading(true);
-    const { statusCode } = await updateAnnotationData(annotation, trueId);
+    const { statusCode } = await updateAnnotationData(annotation as string, trueId);
 
     if (statusCode === 204) {
-      await mutate(`${process.env.NEXT_PUBLIC_API_BASEURL}/annotations/${trueId}`, annotation);
-      setSnackPack((prev: any) => [...prev, { message: 'Conteúdo salvo com sucesso', severity: 'success', key: new Date().getTime() }]);
+      setSnackPack((prev: any) => [...prev, { message: 'Conteúdo salvo com sucesso', severity: 'success', autoHideDuration: 5000, key: new Date().getTime() }]);
+      mutate();
       setSaveButtonLoading(false);
     } else {
-      setSnackPack((prev: any) => [...prev, { message: 'Não foi possível salvar o conteúdo', severity: 'error', key: new Date().getTime() }]);
+      setSnackPack((prev: any) => [...prev, { message: 'Não foi possível salvar o conteúdo', severity: 'error', autoHideDuration: 5000, key: new Date().getTime() }]);
       setSaveButtonLoading(false);
     }
   }
@@ -204,7 +216,7 @@ const Content = ({ id }: { id: string | string[] | undefined }) => {
     <Grid container spacing={2} style={{ marginTop: '1rem' }} >
       <ConsecutiveSnackbar snackPack={snackPack} setSnackPack={setSnackPack} snackBarState={isSnackbarOpen} setSnackBarState={setIsSnackbarOpen} errorMessage={errorMessage} setErrorMessage={setErrorMessage} />
       <TextBoxOptionBar id={id} trueId={trueId} handleClearClick={handleClearClick} handleResetClick={handleResetClick} handleSaveClick={handleSaveClick} setSnackPack={setSnackPack} snackbarStateSetter={setIsSnackbarOpen} saveButtonLoadingState={saveButtonLoading} />
-      <TextBox annotation={annotation} handleChange={handleChange} />
+      <TextBox annotation={annotation as string} handleChange={handleChange} />
     </Grid>
   )
 }
