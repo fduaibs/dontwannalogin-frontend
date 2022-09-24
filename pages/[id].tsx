@@ -1,7 +1,7 @@
 import type { NextPage } from 'next'
 import { useRouter } from 'next/router'
 import { useEffect, useRef, useState } from 'react';
-import useSWR, { useSWRConfig } from 'swr';
+import useSWR from 'swr';
 import Grid from '@mui/material/Unstable_Grid2';
 import Container from '@mui/material/Container';
 import TextField from '@mui/material/TextField';
@@ -15,15 +15,18 @@ import AdbIcon from '@mui/icons-material/Adb';
 import LoadingButton from '@mui/lab/LoadingButton';
 import ConsecutiveSnackbar, { SnackbarMessage } from '../components/ConsecutiveSnackbar';
 
-const fetcher = async (input: RequestInfo | URL, init?: RequestInit | undefined) => await fetch(input, init).then(res => res.json())
 
 const useAnnotation = (id: string | string[] | undefined) => {
-  const { data, error } = useSWR(`${process.env.NEXT_PUBLIC_API_BASEURL}/annotations/${id}/find-by-alias-or-id`, fetcher);
+  const fetcher = async (input: RequestInfo | URL, init?: RequestInit | undefined) => await fetch(input, init).then(res => res.json());
+
+  const { data, error, isValidating, mutate } = useSWR(`${process.env.NEXT_PUBLIC_API_BASEURL}/annotations/${id}/find-by-alias-or-id`, fetcher);
 
   return {
     fetchedAnnotation: data,
     isAnnotationLoading: !error && !data,
     isAnnotationError: error,
+    isValidating,
+    mutate,
   }
 }
 
@@ -157,19 +160,18 @@ const Content = ({ id }: { id: string | string[] | undefined }) => {
   const [snackPack, setSnackPack] = useState<readonly SnackbarMessage[]>([]);
   const [errorMessage, setErrorMessage] = useState<SnackbarMessage | undefined>(undefined);
   const [saveButtonLoading, setSaveButtonLoading] = useState(false);
-  const { fetchedAnnotation, isAnnotationLoading } = useAnnotation(id);
+  const { fetchedAnnotation, isAnnotationLoading, mutate } = useAnnotation(id);
   const trueId = fetchedAnnotation?._id;
 
   const router = useRouter();
+
   if (fetchedAnnotation?.alias && id != fetchedAnnotation.alias) {
     router.push(`${fetchedAnnotation.alias}`)
   }
 
-  const { mutate } = useSWRConfig();
-
   useEffect(() => {
     if (!isAnnotationLoading) setAnnotation(fetchedAnnotation?.data || '');
-  }, [isAnnotationLoading])
+  }, [isAnnotationLoading]);
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setAnnotation(event.target.value);
@@ -189,6 +191,7 @@ const Content = ({ id }: { id: string | string[] | undefined }) => {
 
     if (statusCode === 204) {
       setSnackPack((prev: any) => [...prev, { message: 'Conteúdo salvo com sucesso', severity: 'success', key: new Date().getTime() }]);
+      mutate();
       setSaveButtonLoading(false);
     } else {
       setSnackPack((prev: any) => [...prev, { message: 'Não foi possível salvar o conteúdo', severity: 'error', key: new Date().getTime() }]);
