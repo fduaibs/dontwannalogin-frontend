@@ -109,13 +109,13 @@ const TextBoxOptionBar = ({ id, trueId, handleClearClick, handleResetClick, hand
         router.push(`/${alias}`);
       } else {
         snackbarStateSetter(true);
-        setSnackPack((prev: any) => [...prev, { message, severity: 'error', key: new Date().getTime() }]);
+        setSnackPack((prev: any) => [...prev, { message, severity: 'error', autoHideDuration: 5000, key: new Date().getTime() }]);
         setDoneButtonLoading(false);
       }
     } else {
       setDoneButtonLoading(true);
       snackbarStateSetter(true);
-      setSnackPack((prev: any) => [...prev, { message: 'O apelido precisa ser diferente do atual', severity: 'error', key: new Date().getTime() }]);
+      setSnackPack((prev: any) => [...prev, { message: 'O apelido precisa ser diferente do atual', severity: 'error', autoHideDuration: 5000, key: new Date().getTime() }]);
       setDoneButtonLoading(false);
     }
   }
@@ -155,12 +155,12 @@ const TextBox = ({ annotation, handleChange }: { annotation: string, handleChang
 }
 
 const Content = ({ id }: { id: string | string[] | undefined }) => {
-  const [annotation, setAnnotation] = useState('');
+  const [annotation, setAnnotation] = useState<undefined | string>(undefined);
   const [isSnackbarOpen, setIsSnackbarOpen] = useState(false);
   const [snackPack, setSnackPack] = useState<readonly SnackbarMessage[]>([]);
   const [errorMessage, setErrorMessage] = useState<SnackbarMessage | undefined>(undefined);
   const [saveButtonLoading, setSaveButtonLoading] = useState(false);
-  const { fetchedAnnotation, isAnnotationLoading, mutate } = useAnnotation(id);
+  const { fetchedAnnotation, isAnnotationLoading, mutate, isValidating } = useAnnotation(id);
   const trueId = fetchedAnnotation?._id;
 
   const router = useRouter();
@@ -172,6 +172,11 @@ const Content = ({ id }: { id: string | string[] | undefined }) => {
   useEffect(() => {
     if (!isAnnotationLoading) setAnnotation(fetchedAnnotation?.data || '');
   }, [isAnnotationLoading]);
+
+  useEffect(() => {
+    if (!isValidating && fetchedAnnotation?.data != annotation && annotation != undefined)
+      setSnackPack((prev: any) => [...prev, { message: 'Alguém alterou seu documento de outra sessão', severity: 'warning', key: new Date().getTime() }]);
+  }, [isValidating]);
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setAnnotation(event.target.value);
@@ -187,14 +192,14 @@ const Content = ({ id }: { id: string | string[] | undefined }) => {
 
   const handleSaveClick = async () => {
     setSaveButtonLoading(true);
-    const { statusCode } = await updateAnnotationData(annotation, trueId);
+    const { statusCode } = await updateAnnotationData(annotation as string, trueId);
 
     if (statusCode === 204) {
-      setSnackPack((prev: any) => [...prev, { message: 'Conteúdo salvo com sucesso', severity: 'success', key: new Date().getTime() }]);
+      setSnackPack((prev: any) => [...prev, { message: 'Conteúdo salvo com sucesso', severity: 'success', autoHideDuration: 5000, key: new Date().getTime() }]);
       mutate();
       setSaveButtonLoading(false);
     } else {
-      setSnackPack((prev: any) => [...prev, { message: 'Não foi possível salvar o conteúdo', severity: 'error', key: new Date().getTime() }]);
+      setSnackPack((prev: any) => [...prev, { message: 'Não foi possível salvar o conteúdo', severity: 'error', autoHideDuration: 5000, key: new Date().getTime() }]);
       setSaveButtonLoading(false);
     }
   }
@@ -211,7 +216,7 @@ const Content = ({ id }: { id: string | string[] | undefined }) => {
     <Grid container spacing={2} style={{ marginTop: '1rem' }} >
       <ConsecutiveSnackbar snackPack={snackPack} setSnackPack={setSnackPack} snackBarState={isSnackbarOpen} setSnackBarState={setIsSnackbarOpen} errorMessage={errorMessage} setErrorMessage={setErrorMessage} />
       <TextBoxOptionBar id={id} trueId={trueId} handleClearClick={handleClearClick} handleResetClick={handleResetClick} handleSaveClick={handleSaveClick} setSnackPack={setSnackPack} snackbarStateSetter={setIsSnackbarOpen} saveButtonLoadingState={saveButtonLoading} />
-      <TextBox annotation={annotation} handleChange={handleChange} />
+      <TextBox annotation={annotation as string} handleChange={handleChange} />
     </Grid>
   )
 }
