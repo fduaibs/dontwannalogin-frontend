@@ -33,7 +33,7 @@ const Home: NextPage = () => {
     if (statusCode === 201 && data?.alias) router.push(`/${data?.alias}`);
     else {
       setIsSnackbarOpen(true);
-      setSnackPack((prev: any) => [...prev, { message: 'Não foi possível criar uma nova anotação', severity: 'error', autoHideDuration: 5000, key: new Date().getTime() }]);
+      setSnackPack((prev: any) => [...prev, { message: 'Não foi possível criar uma nova anotação', severity: 'error', key: new Date().getTime() }]);
       setButtonLoading(false);
     };
   }

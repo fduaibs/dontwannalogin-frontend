@@ -5,7 +5,6 @@ import MuiAlert, { AlertProps } from '@mui/material/Alert';
 export interface SnackbarMessage {
   severity: 'error' | 'warning' | 'info' | 'success';
   message: string;
-  autoHideDuration: null | number;
   key: number;
 }
 
@@ -40,7 +39,7 @@ export default function ConsecutiveSnackbar({ snackPack, setSnackPack, snackBarS
       <Snackbar
         key={errorMessage ? errorMessage.key : undefined}
         open={snackBarState}
-        autoHideDuration={errorMessage ? errorMessage.autoHideDuration : null}
+        autoHideDuration={5000}
         onClose={handleClose}
         TransitionProps={{ onExited: handleExited }}
         message={errorMessage ? errorMessage.message : undefined}
