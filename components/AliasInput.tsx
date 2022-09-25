@@ -4,6 +4,7 @@ import TextField from '@mui/material/TextField';
 import Button from '@mui/material/Button';
 import LoadingButton from '@mui/lab/LoadingButton';
 import { updateAlias } from '../services/dontWannaLogin';
+import { aliasValidForUpdate } from '../utils/aliasValidForUpdate';
 
 export interface AliasInput {
   id: string | string[] | undefined;
@@ -32,32 +33,42 @@ export const AliasInput = ({ id, trueId, setSnackPack }: AliasInput) => {
   };
 
   const handleDoneClick = async () => {
-    if (alias === id) {
-      setDoneButtonLoading(true);
+    setDoneButtonLoading(true);
+    const trimmedAlias = alias?.toString().trim();
+    const { valid, message, severity } = aliasValidForUpdate(trimmedAlias, id);
+
+    if (!valid) {
       setSnackPack((prev: any) => [
         ...prev,
         {
-          message: 'O apelido precisa ser diferente do atual',
-          severity: 'error',
+          message,
+          severity,
           key: new Date().getTime(),
         },
       ]);
-      setDoneButtonLoading(false);
     } else {
-      setDoneButtonLoading(true);
-      const { statusCode, message } = await updateAlias(trueId, alias);
+      const { statusCode, message } = await updateAlias(trueId, trimmedAlias);
+
       if (statusCode === 204) {
+        setSnackPack((prev: any) => [
+          ...prev,
+          {
+            message: 'Apelido alterado com sucesso',
+            severity: 'success',
+            key: new Date().getTime(),
+          },
+        ]);
         setInputState(false);
         setDoneButtonLoading(false);
-        router.push(`/${alias}`);
+        router.push(`/${trimmedAlias}`);
       } else {
         setSnackPack((prev: any) => [
           ...prev,
           { message, severity: 'error', key: new Date().getTime() },
         ]);
-        setDoneButtonLoading(false);
       }
     }
+    setDoneButtonLoading(false);
   };
 
   const handleCancelClick = () => {
