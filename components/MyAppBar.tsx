@@ -6,13 +6,13 @@ import AdbIcon from '@mui/icons-material/Adb';
 export const MyAppBar = () => {
   return (
     <>
-      <AppBar position="static">
+      <AppBar position='static'>
         <Toolbar disableGutters>
           <Typography
-            variant="h4"
+            variant='h4'
             noWrap
-            component="a"
-            href="/"
+            component='a'
+            href='/'
             sx={{
               mr: 2,
               display: { xs: 'flex' },
@@ -30,4 +30,4 @@ export const MyAppBar = () => {
       </AppBar>
     </>
   );
-}
+};

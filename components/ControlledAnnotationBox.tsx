@@ -13,7 +13,14 @@ export interface ControlledAnnotationBox {
   mutate: any;
 }
 
-export const ControlledAnnotationBox = ({ id, trueId, setSnackPack, fetchedAnnotation, isAnnotationLoading, mutate }: ControlledAnnotationBox) => {
+export const ControlledAnnotationBox = ({
+  id,
+  trueId,
+  setSnackPack,
+  fetchedAnnotation,
+  isAnnotationLoading,
+  mutate,
+}: ControlledAnnotationBox) => {
   const [annotation, setAnnotation] = useState('');
 
   useEffect(() => {
@@ -22,15 +29,48 @@ export const ControlledAnnotationBox = ({ id, trueId, setSnackPack, fetchedAnnot
 
   return (
     <>
-      <Grid xs={12} sm={7} md={5} lg={4} display='flex' justifyContent={{ xs: "center", sm: "flex-end" }} alignItems="center">
-        <AliasInput id={id} trueId={trueId} setSnackPack={setSnackPack} />
+      <Grid
+        xs={12}
+        sm={7}
+        md={5}
+        lg={4}
+        display='flex'
+        justifyContent={{ xs: 'center', sm: 'flex-end' }}
+        alignItems='center'
+      >
+        <AliasInput
+          id={id}
+          trueId={trueId}
+          setSnackPack={setSnackPack}
+        />
       </Grid>
-      <Grid xs={12} sm display='flex' justifyContent={{ xs: "center", sm: "flex-end" }} alignItems="center">
-        <AnnotationBoxController trueId={trueId} annotation={annotation} setAnnotation={setAnnotation} data={fetchedAnnotation?.data} mutate={mutate} setSnackPack={setSnackPack} />
+      <Grid
+        xs={12}
+        sm
+        display='flex'
+        justifyContent={{ xs: 'center', sm: 'flex-end' }}
+        alignItems='center'
+      >
+        <AnnotationBoxController
+          trueId={trueId}
+          annotation={annotation}
+          setAnnotation={setAnnotation}
+          data={fetchedAnnotation?.data}
+          mutate={mutate}
+          setSnackPack={setSnackPack}
+        />
       </Grid>
-      <Grid xs={12} display='flex' justifyContent="center" alignItems="stretch">
-        <AnnotationBox annotation={annotation} setAnnotation={setAnnotation} />
+      <Grid
+        xs={12}
+        display='flex'
+        justifyContent='center'
+        alignItems='stretch'
+      >
+        <AnnotationBox
+          annotation={annotation}
+          setAnnotation={setAnnotation}
+        />
       </Grid>
     </>
-  )
-}
+  );
+};

@@ -13,13 +13,28 @@ export interface ConsecutiveSnackbar {
   setSnackPack: any;
 }
 
-const Alert = forwardRef<HTMLDivElement, AlertProps>(function Alert(props, ref) {
-  return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
+const Alert = forwardRef<HTMLDivElement, AlertProps>(function Alert(
+  props,
+  ref
+) {
+  return (
+    <MuiAlert
+      elevation={6}
+      ref={ref}
+      variant='filled'
+      {...props}
+    />
+  );
 });
 
-export default function ConsecutiveSnackbar({ snackPack, setSnackPack }: ConsecutiveSnackbar) {
+export default function ConsecutiveSnackbar({
+  snackPack,
+  setSnackPack,
+}: ConsecutiveSnackbar) {
   const [snackbarOpen, setSnackbarOpen] = useState(false);
-  const [errorMessage, setErrorMessage] = useState<SnackbarMessage | undefined>(undefined);
+  const [errorMessage, setErrorMessage] = useState<SnackbarMessage | undefined>(
+    undefined
+  );
 
   useEffect(() => {
     if (snackPack.length && !errorMessage) {
@@ -53,7 +68,11 @@ export default function ConsecutiveSnackbar({ snackPack, setSnackPack }: Consecu
         message={errorMessage ? errorMessage.message : undefined}
         anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
       >
-        <Alert onClose={handleClose} severity={errorMessage?.severity} sx={{ width: '100%' }}>
+        <Alert
+          onClose={handleClose}
+          severity={errorMessage?.severity}
+          sx={{ width: '100%' }}
+        >
           {errorMessage?.message}
         </Alert>
       </Snackbar>

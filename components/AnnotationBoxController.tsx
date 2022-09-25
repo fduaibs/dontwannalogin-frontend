@@ -13,7 +13,14 @@ export interface TextBoxController {
   mutate: any;
 }
 
-export const AnnotationBoxController = ({ trueId, annotation, setAnnotation, setSnackPack, data, mutate }: TextBoxController) => {
+export const AnnotationBoxController = ({
+  trueId,
+  annotation,
+  setAnnotation,
+  setSnackPack,
+  data,
+  mutate,
+}: TextBoxController) => {
   const [saveButtonLoading, setSaveButtonLoading] = useState(false);
 
   const handleSaveClick = async () => {
@@ -21,30 +28,61 @@ export const AnnotationBoxController = ({ trueId, annotation, setAnnotation, set
     const { statusCode } = await updateAnnotationData(annotation, trueId);
 
     if (statusCode === 204) {
-      setSnackPack((prev: any) => [...prev, { message: 'Conteúdo salvo com sucesso', severity: 'success', key: new Date().getTime() }]);
+      setSnackPack((prev: any) => [
+        ...prev,
+        {
+          message: 'Conteúdo salvo com sucesso',
+          severity: 'success',
+          key: new Date().getTime(),
+        },
+      ]);
       mutate();
       setSaveButtonLoading(false);
     } else {
-      setSnackPack((prev: any) => [...prev, { message: 'Não foi possível salvar o conteúdo', severity: 'error', key: new Date().getTime() }]);
+      setSnackPack((prev: any) => [
+        ...prev,
+        {
+          message: 'Não foi possível salvar o conteúdo',
+          severity: 'error',
+          key: new Date().getTime(),
+        },
+      ]);
       setSaveButtonLoading(false);
     }
-  }
+  };
 
   const handleResetClick = () => {
     setAnnotation(data);
-  }
+  };
 
   const handleClearClick = () => {
     setAnnotation('');
-  }
+  };
 
   return (
-    <ButtonGroup aria-label="medium secondary button group">
+    <ButtonGroup aria-label='medium secondary button group'>
       {[
-        <LoadingButton variant="outlined" loading={saveButtonLoading} key="save" onClick={handleSaveClick}>Save</LoadingButton>,
-        <Button key="reset" onClick={handleResetClick}>Reset</Button>,
-        <Button key="clear" onClick={handleClearClick}>Clear</Button>,
+        <LoadingButton
+          variant='outlined'
+          loading={saveButtonLoading}
+          key='save'
+          onClick={handleSaveClick}
+        >
+          Save
+        </LoadingButton>,
+        <Button
+          key='reset'
+          onClick={handleResetClick}
+        >
+          Reset
+        </Button>,
+        <Button
+          key='clear'
+          onClick={handleClearClick}
+        >
+          Clear
+        </Button>,
       ]}
     </ButtonGroup>
   );
-}
+};

@@ -1,4 +1,4 @@
-import useSWRImmutable from "swr";
+import useSWRImmutable from 'swr';
 
 export const useAnnotation = (id: string | string[] | undefined) => {
   const fetcher = async (

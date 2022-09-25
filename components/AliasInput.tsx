@@ -23,19 +23,25 @@ export const AliasInput = ({ id, trueId, setSnackPack }: AliasInput) => {
     if (inputState) inputRef.current?.focus();
   }, [inputState]);
 
-
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setAlias(event.target.value);
-  }
+  };
 
   const handleEditClick = () => {
     setInputState(true);
-  }
+  };
 
   const handleDoneClick = async () => {
     if (alias === id) {
       setDoneButtonLoading(true);
-      setSnackPack((prev: any) => [...prev, { message: 'O apelido precisa ser diferente do atual', severity: 'error', key: new Date().getTime() }]);
+      setSnackPack((prev: any) => [
+        ...prev,
+        {
+          message: 'O apelido precisa ser diferente do atual',
+          severity: 'error',
+          key: new Date().getTime(),
+        },
+      ]);
       setDoneButtonLoading(false);
     } else {
       setDoneButtonLoading(true);
@@ -45,29 +51,56 @@ export const AliasInput = ({ id, trueId, setSnackPack }: AliasInput) => {
         setDoneButtonLoading(false);
         router.push(`/${alias}`);
       } else {
-        setSnackPack((prev: any) => [...prev, { message, severity: 'error', key: new Date().getTime() }]);
+        setSnackPack((prev: any) => [
+          ...prev,
+          { message, severity: 'error', key: new Date().getTime() },
+        ]);
         setDoneButtonLoading(false);
       }
     }
-  }
+  };
 
   const handleCancelClick = () => {
     setAlias(id);
     setDoneButtonLoading(false);
     setInputState(false);
-  }
+  };
 
   return (
     <>
-      <TextField value={alias} fullWidth disabled={!inputState} inputRef={inputRef} id="standard-basic" variant="standard" onChange={handleChange} />
+      <TextField
+        value={alias}
+        fullWidth
+        disabled={!inputState}
+        inputRef={inputRef}
+        id='standard-basic'
+        variant='standard'
+        onChange={handleChange}
+      />
       {inputState ? (
         <>
-          <LoadingButton loading={doneButtonLoading} key="done" onClick={handleDoneClick}>Done</LoadingButton>
-          <Button key="cancel" onClick={handleCancelClick}>Cancel</Button>
+          <LoadingButton
+            loading={doneButtonLoading}
+            key='done'
+            onClick={handleDoneClick}
+          >
+            Done
+          </LoadingButton>
+          <Button
+            key='cancel'
+            onClick={handleCancelClick}
+          >
+            Cancel
+          </Button>
         </>
       ) : (
-        <Button key="edit" onClick={handleEditClick}>Edit</Button>
+        <Button
+          key='edit'
+          onClick={handleEditClick}
+        >
+          Edit
+        </Button>
       )}
     </>
   );
-}
+};

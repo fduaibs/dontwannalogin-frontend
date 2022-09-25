@@ -6,14 +6,13 @@ export interface AnnotationBox {
 }
 
 export const AnnotationBox = ({ annotation, setAnnotation }: AnnotationBox) => {
-
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setAnnotation(event.target.value);
-  }
+  };
 
   return (
     <TextField
-      id="outlined-multiline-static"
+      id='outlined-multiline-static'
       multiline
       fullWidth
       rows={25}

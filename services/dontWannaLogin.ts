@@ -2,8 +2,8 @@ export const createAnnotation = async () => {
   const createdAnnotation = await fetch(
     `${process.env.NEXT_PUBLIC_API_BASEURL}/annotations/`,
     {
-      method: "POST",
-      body: JSON.stringify({ alias: "", password: "", data: "" }),
+      method: 'POST',
+      body: JSON.stringify({ alias: '', password: '', data: '' }),
     }
   );
 
@@ -21,10 +21,10 @@ export const updateAnnotationData = async (
   const updatedAnnotation = await fetch(
     `${process.env.NEXT_PUBLIC_API_BASEURL}/annotations/${id}`,
     {
-      method: "PATCH",
+      method: 'PATCH',
       body: JSON.stringify({ data: annotation }),
       headers: {
-        "Content-type": "application/json; charset=UTF-8",
+        'Content-type': 'application/json; charset=UTF-8',
       },
     }
   );
@@ -53,10 +53,10 @@ export const updateAlias = async (
   const updatedAlias = await fetch(
     `${process.env.NEXT_PUBLIC_API_BASEURL}/annotations/${id}`,
     {
-      method: "PATCH",
+      method: 'PATCH',
       body: JSON.stringify({ alias: alias }),
       headers: {
-        "Content-type": "application/json; charset=UTF-8",
+        'Content-type': 'application/json; charset=UTF-8',
       },
     }
   );
