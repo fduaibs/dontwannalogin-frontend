@@ -14,6 +14,7 @@ import { ControlledAnnotationBox } from '../components/ControlledAnnotationBox';
 const Annotations: NextPage = () => {
   const [snackPack, setSnackPack] = useState<readonly SnackbarMessage[]>([]);
   const router = useRouter();
+
   const { id } = router.query;
   const { fetchedAnnotation, isAnnotationLoading, mutate } = useAnnotation(id);
 
@@ -22,9 +23,23 @@ const Annotations: NextPage = () => {
   // se não tiver id, ou fetch inicial da annotation ainda tá acontecendo, retorna loading
   if (!id || isAnnotationLoading)
     return (
-      <Grid xs={12} display='flex' justifyContent='center' alignItems='stretch'>
-        <CircularProgress />
-      </Grid>
+      <>
+        <ConsecutiveSnackbar
+          snackPack={snackPack}
+          setSnackPack={setSnackPack}
+        />
+        <MyAppBar />
+        <Container fixed>
+          <Grid
+            xs={12}
+            display='flex'
+            justifyContent='center'
+            alignItems='stretch'
+          >
+            <CircularProgress />
+          </Grid>
+        </Container>
+      </>
     );
 
   // se entrar com id e tiver alias, redireciona a url pro alias
@@ -35,9 +50,23 @@ const Annotations: NextPage = () => {
   // se já tem id, não tá dando loading e trueId não foi encontrado, redireciona pra notfound
   if (id && !isAnnotationLoading && !trueId)
     return (
-      <Grid xs={12} display='flex' justifyContent='center' alignItems='stretch'>
-        NOT FOUND
-      </Grid>
+      <>
+        <ConsecutiveSnackbar
+          snackPack={snackPack}
+          setSnackPack={setSnackPack}
+        />
+        <MyAppBar />
+        <Container fixed>
+          <Grid
+            xs={12}
+            display='flex'
+            justifyContent='center'
+            alignItems='stretch'
+          >
+            NOT FOUND
+          </Grid>
+        </Container>
+      </>
     );
 
   return (
