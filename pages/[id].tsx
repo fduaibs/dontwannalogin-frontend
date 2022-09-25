@@ -22,12 +22,7 @@ const Annotations: NextPage = () => {
   // se não tiver id, ou fetch inicial da annotation ainda tá acontecendo, retorna loading
   if (!id || isAnnotationLoading)
     return (
-      <Grid
-        xs={12}
-        display='flex'
-        justifyContent='center'
-        alignItems='stretch'
-      >
+      <Grid xs={12} display='flex' justifyContent='center' alignItems='stretch'>
         <CircularProgress />
       </Grid>
     );
@@ -40,22 +35,14 @@ const Annotations: NextPage = () => {
   // se já tem id, não tá dando loading e trueId não foi encontrado, redireciona pra notfound
   if (id && !isAnnotationLoading && !trueId)
     return (
-      <Grid
-        xs={12}
-        display='flex'
-        justifyContent='center'
-        alignItems='stretch'
-      >
+      <Grid xs={12} display='flex' justifyContent='center' alignItems='stretch'>
         NOT FOUND
       </Grid>
     );
 
   return (
     <>
-      <ConsecutiveSnackbar
-        snackPack={snackPack}
-        setSnackPack={setSnackPack}
-      />
+      <ConsecutiveSnackbar snackPack={snackPack} setSnackPack={setSnackPack} />
       <MyAppBar />
       <Container fixed>
         <Grid

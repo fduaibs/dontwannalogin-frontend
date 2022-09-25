@@ -70,16 +70,10 @@ export const AnnotationBoxController = ({
         >
           Save
         </LoadingButton>,
-        <Button
-          key='reset'
-          onClick={handleResetClick}
-        >
+        <Button key='reset' onClick={handleResetClick}>
           Reset
         </Button>,
-        <Button
-          key='clear'
-          onClick={handleClearClick}
-        >
+        <Button key='clear' onClick={handleClearClick}>
           Clear
         </Button>,
       ]}

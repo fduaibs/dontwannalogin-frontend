@@ -41,19 +41,10 @@ const Home: NextPage = () => {
     <Container fixed>
       <Head>
         <title>NãoQueroLogar!</title>
-        <meta
-          name='description'
-          content='Bloco de notas persistente online.'
-        />
-        <link
-          rel='icon'
-          href='/favicon.ico'
-        />
+        <meta name='description' content='Bloco de notas persistente online.' />
+        <link rel='icon' href='/favicon.ico' />
       </Head>
-      <Grid
-        container
-        spacing={0}
-      >
+      <Grid container spacing={0}>
         <ConsecutiveSnackbar
           snackPack={snackPack}
           setSnackPack={setSnackPack}

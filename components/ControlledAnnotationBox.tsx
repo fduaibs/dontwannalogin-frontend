@@ -38,11 +38,7 @@ export const ControlledAnnotationBox = ({
         justifyContent={{ xs: 'center', sm: 'flex-end' }}
         alignItems='center'
       >
-        <AliasInput
-          id={id}
-          trueId={trueId}
-          setSnackPack={setSnackPack}
-        />
+        <AliasInput id={id} trueId={trueId} setSnackPack={setSnackPack} />
       </Grid>
       <Grid
         xs={12}
@@ -60,16 +56,8 @@ export const ControlledAnnotationBox = ({
           setSnackPack={setSnackPack}
         />
       </Grid>
-      <Grid
-        xs={12}
-        display='flex'
-        justifyContent='center'
-        alignItems='stretch'
-      >
-        <AnnotationBox
-          annotation={annotation}
-          setAnnotation={setAnnotation}
-        />
+      <Grid xs={12} display='flex' justifyContent='center' alignItems='stretch'>
+        <AnnotationBox annotation={annotation} setAnnotation={setAnnotation} />
       </Grid>
     </>
   );

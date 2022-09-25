@@ -86,18 +86,12 @@ export const AliasInput = ({ id, trueId, setSnackPack }: AliasInput) => {
           >
             Done
           </LoadingButton>
-          <Button
-            key='cancel'
-            onClick={handleCancelClick}
-          >
+          <Button key='cancel' onClick={handleCancelClick}>
             Cancel
           </Button>
         </>
       ) : (
-        <Button
-          key='edit'
-          onClick={handleEditClick}
-        >
+        <Button key='edit' onClick={handleEditClick}>
           Edit
         </Button>
       )}
