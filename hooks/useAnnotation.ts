@@ -1,4 +1,4 @@
-import useSWR from "swr";
+import useSWRImmutable from "swr";
 
 export const useAnnotation = (id: string | string[] | undefined) => {
   const fetcher = async (
@@ -6,7 +6,7 @@ export const useAnnotation = (id: string | string[] | undefined) => {
     init?: RequestInit | undefined
   ) => await fetch(input, init).then((res) => res.json());
 
-  const { data, error, isValidating, mutate } = useSWR(
+  const { data, error, isValidating, mutate } = useSWRImmutable(
     `${process.env.NEXT_PUBLIC_API_BASEURL}/annotations/${id}/find-by-alias-or-id`,
     fetcher
   );
