@@ -1,3 +1,19 @@
+export const createAnnotation = async () => {
+  const createdAnnotation = await fetch(
+    `${process.env.NEXT_PUBLIC_API_BASEURL}/annotations/`,
+    {
+      method: "POST",
+      body: JSON.stringify({ alias: "", password: "", data: "" }),
+    }
+  );
+
+  return {
+    statusCode: createdAnnotation.status,
+    data: await createdAnnotation.json(),
+    message: createdAnnotation.statusText,
+  };
+};
+
 export const updateAnnotationData = async (
   annotation: string,
   id: string | string[] | undefined
