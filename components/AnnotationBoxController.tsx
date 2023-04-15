@@ -65,15 +65,20 @@ export const AnnotationBoxController = ({
         <LoadingButton
           variant='outlined'
           loading={saveButtonLoading}
+          disabled={annotation === data}
           key='save'
           onClick={handleSaveClick}
         >
           Save
         </LoadingButton>,
-        <Button key='reset' onClick={handleResetClick}>
+        <Button
+          key='reset'
+          onClick={handleResetClick}
+          disabled={annotation === data}
+        >
           Reset
         </Button>,
-        <Button key='clear' onClick={handleClearClick}>
+        <Button key='clear' onClick={handleClearClick} disabled={!annotation}>
           Clear
         </Button>,
       ]}
