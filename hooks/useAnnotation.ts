@@ -1,13 +1,11 @@
 import useSWRImmutable from 'swr/immutable';
+import { findByAliasOrId } from '../services/dontWannaLogin';
 
 export const useAnnotation = (id: string | string[] | undefined) => {
-  const fetcher = async (
-    input: RequestInfo | URL,
-    init?: RequestInit | undefined
-  ) => await fetch(input, init).then((res) => res.json());
+  const fetcher = async () => await findByAliasOrId(id);
 
   const { data, error, isValidating, mutate } = useSWRImmutable(
-    `${process.env.NEXT_PUBLIC_API_BASEURL}/annotations/${id}/find-by-alias-or-id`,
+    [`/annotations/${id}/find-by-alias-or-id`],
     fetcher
   );
 
