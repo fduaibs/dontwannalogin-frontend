@@ -39,7 +39,6 @@ const Annotations: NextPage = () => {
         <MyAppBar />
         <Container fixed>
           <Grid
-            item
             xs={12}
             display='flex'
             justifyContent='center'
@@ -67,7 +66,6 @@ const Annotations: NextPage = () => {
         <MyAppBar />
         <Container fixed>
           <Grid
-            item
             xs={12}
             display='flex'
             justifyContent='center'
@@ -91,7 +89,7 @@ const Annotations: NextPage = () => {
         <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
           <Tabs value={tabs} onChange={handleChange} aria-label="basic tabs example">
             <Tab label="Anotações" />
-            <Tab label="Images" />
+            <Tab label="Imagens" />
           </Tabs>
           <div
             role="tabpanel"
@@ -100,7 +98,7 @@ const Annotations: NextPage = () => {
             aria-labelledby={`simple-tab-${0}`}
           >
             {tabs === 0 && (
-              <Grid item p={5}>
+              <Grid p={5}>
                 <ControlledAnnotationBox
                   id={id}
                   setSnackPack={setSnackPack}
@@ -116,7 +114,7 @@ const Annotations: NextPage = () => {
             aria-labelledby={`simple-tab-${1}`}
           >
             {tabs === 1 && (
-              <Grid item p={5}>
+              <Grid p={5}>
                 <ControlledImagesBox/>
               </Grid>
             )}

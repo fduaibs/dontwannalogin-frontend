@@ -52,7 +52,7 @@ function ImagesBox() {
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down('md'));
   const { images, deleteImages, hasMore, getImages, isAnnotationLoading } = useAnnotation()
-  const [selectedFileId, setSelectedFileId] = useState<string>(null);
+  const [selectedFileId, setSelectedFileId] = useState<string>('');
 
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
@@ -119,7 +119,6 @@ function ImagesBox() {
                   src={file.downloadURL}
                   srcSet={`/${file.downloadURL}?w=248&fit=crop&auto=format&dpr=2 2x`}
                   alt={file.originalName}
-                  file="lazy"
                   style={{ width: '100%', height: '12rem' }}
                 />
                 <ImageListItemBar
