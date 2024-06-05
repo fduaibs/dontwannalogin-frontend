@@ -89,7 +89,7 @@ const Annotations: NextPage = () => {
         <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
           <Tabs value={tabs} onChange={handleChange} aria-label="basic tabs example">
             <Tab label="Anotações" />
-            <Tab label="Images" />
+            <Tab label="Imagens" />
           </Tabs>
           <div
             role="tabpanel"
