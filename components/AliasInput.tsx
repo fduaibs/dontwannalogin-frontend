@@ -13,16 +13,16 @@ export interface AliasInput {
   setSnackPack: any;
 }
 
-import { TransitionProps } from '@mui/material/transitions';
+// import { TransitionProps } from '@mui/material/transitions';
 
-const Transition = forwardRef(function Transition(
-  props: TransitionProps & {
-    children: React.ReactElement<any, any>;
-  },
-  ref: React.Ref<unknown>,
-) {
-  return <Slide direction="up" ref={ref} {...props} />;
-});
+// const Transition = forwardRef(function Transition(
+//   props: TransitionProps & {
+//     children: React.ReactElement<any, any>;
+//   },
+//   ref: React.Ref<unknown>,
+// ) {
+//   return <Slide direction="up" ref={ref} {...props} />;
+// });
 
 export const AliasInput = ({ id, trueId, setSnackPack }: AliasInput) => {
   const [alias, setAlias] = useState(id);
@@ -73,7 +73,7 @@ export const AliasInput = ({ id, trueId, setSnackPack }: AliasInput) => {
         },
       ]);
     } else {
-      await update(trueId, trimmedAlias).then((response) => {
+      await update(trueId, trimmedAlias as string).then((response) => {
         if (response) {
           setSnackPack((prev: any) => [
             ...prev,

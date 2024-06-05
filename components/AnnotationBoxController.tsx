@@ -10,7 +10,6 @@ export interface TextBoxController {
   setSnackPack: any;
   setAnnotation: any;
   data: string;
-  mutate: any;
 }
 
 export const AnnotationBoxController = ({
