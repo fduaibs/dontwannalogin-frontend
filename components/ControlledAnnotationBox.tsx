@@ -6,6 +6,7 @@ import { AnnotationBoxController } from './AnnotationBoxController';
 import { AnnotationBox } from './AnnotationBox';
 import { Funcao, IChatGPT } from '../Types/ITypes';
 import { useAnnotation } from '../hooks/useAnnotation';
+import { AudioPlayer } from './AudioPlayer';
 
 export interface ControlledAnnotationBox {
   id: string | string[] | undefined;
@@ -22,7 +23,7 @@ export const ControlledAnnotationBox = ({
   const [annotation, setAnnotation] = useState<string>(fetchedAnnotation?.data);
   const [loading, setLoading] = useState<boolean>(false);
 
-  const { chatGpt } = useAnnotation()
+  const { chatGpt, playerAudio } = useAnnotation()
 
   const handleChatGPTFunction = async (chatGPTFunction: Funcao) => {
     setLoading(true)
@@ -38,6 +39,10 @@ export const ControlledAnnotationBox = ({
     setLoading(false)
   }
 
+  const handlePlayAudio = async () => {
+    await playerAudio(annotation)
+  }
+
   return (
       <Grid container>
         <Grid
@@ -45,6 +50,7 @@ export const ControlledAnnotationBox = ({
           xs={12}
           sm={12}
           spacing={2}>
+          <AudioPlayer/>
           <Grid container md={12} spacing={3}>
             <Grid xs={12} md={9}>
               <AliasInput id={id} trueId={trueId} setSnackPack={setSnackPack} />
@@ -100,6 +106,11 @@ export const ControlledAnnotationBox = ({
               <Grid container>
                 <Button key='Corrigir' onClick={() => handleChatGPTFunction(Funcao.Corrigir)}>
                   Corrigir
+                </Button>
+              </Grid>
+              <Grid container>
+                <Button key='Corrigir' onClick={() => handlePlayAudio()}>
+                  Ouvir
                 </Button>
               </Grid>
             </>

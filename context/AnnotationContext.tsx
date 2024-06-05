@@ -21,6 +21,8 @@ export interface AnnotationContextData {
     hasMore: boolean
     page: number
     chatGpt: (chatGPTBody: IChatGPT) => Promise<AxiosResponse<IChatGPTReponse>>
+    audioPlayer: string
+    playerAudio: (text: string) => Promise<AxiosResponse | void>
 }
 
 interface AnnotationProviderProps {
@@ -37,6 +39,7 @@ function AnnotationProvider({ children }: AnnotationProviderProps): JSX.Element 
     const [totalImages, setTotalImages] = useState<number>(0)
     const [hasMore, setHasMore] = useState<boolean>(true)
     const [page, setPage] = useState<number>(1)
+    const [audioPlayer, setAudioPlayer] = useState<string>('')
 
     const router = useRouter();
 
@@ -193,6 +196,18 @@ function AnnotationProvider({ children }: AnnotationProviderProps): JSX.Element 
         }
     }
 
+    async function playerAudio(text: string) {
+        try {
+            const response = await AnnotationService.handleListenComment(text)
+            
+            if (response) {
+                setAudioPlayer(response)
+            }
+        } catch (error) {
+            throw Error(`Erro ao tentar da player!`)
+        }
+    }
+
 
     useEffect(() => {
         if (fetchedAnnotation._id) {
@@ -216,7 +231,9 @@ function AnnotationProvider({ children }: AnnotationProviderProps): JSX.Element 
             hasMore,
             page,
             totalImages,
-            chatGpt
+            chatGpt,
+            audioPlayer,
+            playerAudio
         }}>
             {children}
         </AnnotationContext.Provider>
