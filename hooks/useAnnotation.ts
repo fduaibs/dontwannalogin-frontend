@@ -1,19 +1,12 @@
-import useSWRImmutable from 'swr/immutable';
-import { findByAliasOrId } from '../services/dontWannaLogin';
+import { useContext } from "react";
+import { AnnotationContext, AnnotationContextData } from "../context/AnnotationContext";
 
-export const useAnnotation = (id: string | string[] | undefined) => {
-  const fetcher = async () => await findByAliasOrId(id);
+function useAnnotation(): AnnotationContextData {
+  const context = useContext(AnnotationContext);
 
-  const { data, error, isValidating, mutate } = useSWRImmutable(
-    [`/annotations/${id}/find-by-alias-or-id`],
-    fetcher
-  );
+  return context;
+}
 
-  return {
-    fetchedAnnotation: data,
-    isAnnotationError: error,
-    isAnnotationLoading: !error && !data,
-    isValidating,
-    mutate,
-  };
-};
+export {
+  useAnnotation
+}

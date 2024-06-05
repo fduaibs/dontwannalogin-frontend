@@ -1,64 +1,111 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import Grid from '@mui/material/Unstable_Grid2';
+import { Button, LinearProgress } from '@mui/material';
 import { AliasInput } from './AliasInput';
 import { AnnotationBoxController } from './AnnotationBoxController';
 import { AnnotationBox } from './AnnotationBox';
+import { Funcao, IChatGPT } from '../Types/ITypes';
+import { useAnnotation } from '../hooks/useAnnotation';
 
 export interface ControlledAnnotationBox {
   id: string | string[] | undefined;
-  trueId: string;
   setSnackPack: any;
-  fetchedAnnotation: any;
-  isAnnotationLoading: boolean;
-  mutate: any;
 }
 
 export const ControlledAnnotationBox = ({
   id,
-  trueId,
   setSnackPack,
-  fetchedAnnotation,
-  isAnnotationLoading,
-  mutate,
 }: ControlledAnnotationBox) => {
-  const [annotation, setAnnotation] = useState('');
+  const { fetchedAnnotation, getAnnotation, isAnnotationLoading } = useAnnotation()
 
-  useEffect(() => {
-    if (!isAnnotationLoading) setAnnotation(fetchedAnnotation?.data || '');
-  }, [isAnnotationLoading]);
+  const trueId = fetchedAnnotation?._id
+  const [annotation, setAnnotation] = useState<string>(fetchedAnnotation?.data);
+  const [loading, setLoading] = useState<boolean>(false);
+
+  const { chatGpt } = useAnnotation()
+
+  const handleChatGPTFunction = async (chatGPTFunction: Funcao) => {
+    setLoading(true)
+
+    const body: IChatGPT = {
+      funcao: chatGPTFunction,
+      text: annotation
+    }
+
+    const response = await chatGpt(body)
+
+    setAnnotation(response.data.text)
+    setLoading(false)
+  }
 
   return (
-    <>
+    <Grid container>
       <Grid
+        container
         xs={12}
-        sm={7}
-        md={5}
-        lg={4}
-        display='flex'
-        justifyContent={{ xs: 'center', sm: 'flex-end' }}
-        alignItems='center'
-      >
-        <AliasInput id={id} trueId={trueId} setSnackPack={setSnackPack} />
+        sm={12}
+        spacing={2}>
+        <Grid container md={12} spacing={3}>
+          <Grid item xs={12} md={9}>
+            <AliasInput id={id} trueId={trueId} setSnackPack={setSnackPack} />
+          </Grid>
+          <Grid item md={3}>
+            <AnnotationBoxController
+              trueId={trueId}
+              annotation={annotation}
+              setAnnotation={setAnnotation}
+              data={fetchedAnnotation?.data}
+              setSnackPack={setSnackPack}
+            />
+          </Grid>
+        </Grid>
+        <Grid item xs={10} md={10}>
+          <AnnotationBox annotation={annotation} setAnnotation={setAnnotation} />
+          {loading && <LinearProgress color='info' style={{top: '-1px'}}/>}
+        </Grid>
+        <Grid container xs={1} md={1} spacing={0}>
+          {!loading && (<>
+            <Grid container>
+              <Button key='Resumir' onClick={() => handleChatGPTFunction(Funcao.Resumir)}>
+                Resumir
+              </Button>
+            </Grid>
+            <Grid container>
+              <Button key='Destacar' onClick={() => handleChatGPTFunction(Funcao.Destacar)}>
+                Destacar
+              </Button>
+            </Grid>
+            <Grid container>
+              <Button key='Organizar' onClick={() => handleChatGPTFunction(Funcao.Organizar)}>
+                Organizar
+              </Button>
+
+            </Grid>
+            <Grid container>
+              <Button key='Explicar' onClick={() => handleChatGPTFunction(Funcao.Explicar)}>
+                Explicar
+              </Button>
+
+            </Grid>
+            <Grid container>
+              <Button key='Questionar' onClick={() => handleChatGPTFunction(Funcao.Questionar)}>
+                Questionar
+              </Button>
+            </Grid>
+            <Grid container>
+              <Button key='Topificar' onClick={() => handleChatGPTFunction(Funcao.Topificar)}>
+                Topificar
+              </Button>
+            </Grid>
+            <Grid container>
+              <Button key='Corrigir' onClick={() => handleChatGPTFunction(Funcao.Corrigir)}>
+                Corrigir
+              </Button>
+            </Grid>
+          </>
+          )}
+        </Grid>
       </Grid>
-      <Grid
-        xs={12}
-        sm
-        display='flex'
-        justifyContent={{ xs: 'center', sm: 'flex-end' }}
-        alignItems='center'
-      >
-        <AnnotationBoxController
-          trueId={trueId}
-          annotation={annotation}
-          setAnnotation={setAnnotation}
-          data={fetchedAnnotation?.data}
-          mutate={mutate}
-          setSnackPack={setSnackPack}
-        />
-      </Grid>
-      <Grid xs={12} display='flex' justifyContent='center' alignItems='stretch'>
-        <AnnotationBox annotation={annotation} setAnnotation={setAnnotation} />
-      </Grid>
-    </>
-  );
-};
+    </Grid>
+  )
+}

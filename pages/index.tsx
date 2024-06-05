@@ -11,29 +11,33 @@ import Divider from '@mui/material/Divider';
 import ConsecutiveSnackbar, {
   SnackbarMessage,
 } from '../components/ConsecutiveSnackbar';
-import { createAnnotation } from '../services/dontWannaLogin';
+import { useAnnotation } from '../hooks/useAnnotation';
 
 const Home: NextPage = () => {
   const [buttonLoading, setButtonLoading] = useState(false);
   const [snackPack, setSnackPack] = useState<readonly SnackbarMessage[]>([]);
+  const { create } = useAnnotation()
 
   const router = useRouter();
 
   const handleCreateClick = async () => {
     setButtonLoading(true);
-    const { statusCode, data } = await createAnnotation();
+    const response = await create();
+    if (response) {
+      const { status, data } = response
 
-    if (statusCode === 201 && data?.alias) router.push(`/${data?.alias}`);
-    else {
-      setSnackPack((prev: any) => [
-        ...prev,
-        {
-          message: 'Não foi possível criar uma nova anotação',
-          severity: 'error',
-          key: new Date().getTime(),
-        },
-      ]);
-      setButtonLoading(false);
+      if (status === 201 && data?.alias) router.push(`/${data?.alias}`);
+      else {
+        setSnackPack((prev: any) => [
+          ...prev,
+          {
+            message: 'Não foi possível criar uma nova anotação',
+            severity: 'error',
+            key: new Date().getTime(),
+          },
+        ]);
+        setButtonLoading(false);
+      }
     }
   };
 
