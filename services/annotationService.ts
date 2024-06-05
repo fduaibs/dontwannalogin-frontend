@@ -96,6 +96,22 @@ class AnnotationService {
             throw new Error();
         }
     };
+
+    static async handleListenComment(commentText: string) {
+      try {
+        const response = await api.post(`/text-to-speech/sinthesize`, {
+          text: commentText,
+        });
+
+        const array = Buffer.from(response.data.data, 'base64');
+        const blob = new Blob([array], {type: 'audio/wav'})
+        const objecturl = URL.createObjectURL(blob);
+
+        return objecturl
+      } catch(error) {
+        alert('Não foi possivel sintetizar seu comentário.');
+      }
+  };
 }
 
 export {
