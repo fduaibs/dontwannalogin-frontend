@@ -2,7 +2,7 @@ import { useState } from 'react';
 import Button from '@mui/material/Button';
 import LoadingButton from '@mui/lab/LoadingButton';
 import ButtonGroup from '@mui/material/ButtonGroup';
-import { updateAnnotationData } from '../services/dontWannaLogin';
+import { useAnnotation } from '../hooks/useAnnotation';
 
 export interface TextBoxController {
   trueId: string;
@@ -19,69 +19,70 @@ export const AnnotationBoxController = ({
   setAnnotation,
   setSnackPack,
   data,
-  mutate,
 }: TextBoxController) => {
   const [saveButtonLoading, setSaveButtonLoading] = useState(false);
+  const { updateAnnotation } = useAnnotation()
 
   const handleSaveClick = async () => {
     setSaveButtonLoading(true);
-    const { statusCode } = await updateAnnotationData(annotation, trueId);
-
-    if (statusCode === 204) {
-      setSnackPack((prev: any) => [
-        ...prev,
-        {
-          message: 'Conteúdo salvo com sucesso',
-          severity: 'success',
-          key: new Date().getTime(),
-        },
-      ]);
-      mutate();
-      setSaveButtonLoading(false);
-    } else {
-      setSnackPack((prev: any) => [
-        ...prev,
-        {
-          message: 'Não foi possível salvar o conteúdo',
-          severity: 'error',
-          key: new Date().getTime(),
-        },
-      ]);
-      setSaveButtonLoading(false);
+    const response = await updateAnnotation(annotation, trueId);
+    if (response) {
+      if (response.status === 204) {
+        setSnackPack((prev: any) => [
+          ...prev,
+          {
+            message: 'Conteúdo salvo com sucesso',
+            severity: 'success',
+            key: new Date().getTime(),
+          },
+        ]);
+        setSaveButtonLoading(false);
+      }
+      else {
+        setSnackPack((prev: any) => [
+          ...prev,
+          {
+            message: 'Não foi possível salvar o conteúdo',
+            severity: 'error',
+            key: new Date().getTime(),
+          },
+        ]);
+        setSaveButtonLoading(false);
+      }
     }
-  };
+};
 
-  const handleResetClick = () => {
-    setAnnotation(data);
-  };
+const handleResetClick = () => {
+  setAnnotation(data);
+};
 
-  const handleClearClick = () => {
-    setAnnotation('');
-  };
+const handleClearClick = () => {
+  setAnnotation('');
+};
 
-  return (
-    <ButtonGroup aria-label='medium secondary button group'>
-      {[
-        <LoadingButton
-          variant='outlined'
-          loading={saveButtonLoading}
-          disabled={annotation === data}
-          key='save'
-          onClick={handleSaveClick}
-        >
-          Save
-        </LoadingButton>,
-        <Button
-          key='reset'
-          onClick={handleResetClick}
-          disabled={annotation === data}
-        >
-          Reset
-        </Button>,
-        <Button key='clear' onClick={handleClearClick} disabled={!annotation}>
-          Clear
-        </Button>,
-      ]}
-    </ButtonGroup>
-  );
+return (
+  <ButtonGroup aria-label='medium secondary button group'>
+    {[
+      <LoadingButton
+        variant='outlined'
+        loading={saveButtonLoading}
+        disabled={annotation === data}
+        key='save'
+        onClick={handleSaveClick}
+      >
+        Save
+      </LoadingButton>,
+      <Button
+        key='reset'
+        onClick={handleResetClick}
+        disabled={annotation === data}
+      >
+        Reset
+      </Button>,
+      <Button key='clear' onClick={handleClearClick} disabled={!annotation}>
+        Clear
+      </Button>,
+    ]}
+  </ButtonGroup>
+);
 };

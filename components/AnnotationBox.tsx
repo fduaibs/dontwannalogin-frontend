@@ -9,7 +9,7 @@ export const AnnotationBox = ({ annotation, setAnnotation }: AnnotationBox) => {
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setAnnotation(event.target.value);
   };
-
+  
   return (
     <TextField
       id='outlined-multiline-static'
@@ -19,5 +19,5 @@ export const AnnotationBox = ({ annotation, setAnnotation }: AnnotationBox) => {
       value={annotation}
       onChange={handleChange}
     />
-  );
-};
+  )
+}
